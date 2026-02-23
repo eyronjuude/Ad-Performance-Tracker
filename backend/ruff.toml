@@ -1,0 +1,9 @@
+line-length = 88
+target-version = "py311"
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
+[lint]
+select = ["E", "F", "I"]  # pycodestyle errors, pyflakes, isort
