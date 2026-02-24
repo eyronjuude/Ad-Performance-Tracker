@@ -1,0 +1,32 @@
+---
+description: Use bun for JS/TS package management and scripts
+alwaysApply: true
+---
+
+# Use Bun Instead of Other Package Managers
+
+Use **bun** instead of other package managers for all JavaScript/TypeScript package management and script running in this project.
+
+## Guidelines
+
+- **Install dependencies**: Use `bun install` (not npm, pnpm, yarn, etc.).
+- **Run scripts**: Use `bun run <script>` or `bun <script>` (not npm run, pnpm run, yarn run, etc.).
+- **Run a package binary**: Use `bunx <pkg>` (not npx, pnpx, yarn dlx, etc.).
+- **Add a dependency**: Use `bun add <pkg>` or `bun add -d <pkg>` (not npm install, pnpm add, yarn add, etc.).
+
+## Scope
+
+- Applies in **frontend/** and any Node/JS/TS work in this repo.
+- Python (backend) uses `pip` and `venv`; this rule does not apply there.
+
+## Examples
+
+| Avoid | Use |
+|-------|-----|
+| `npm install` | `bun install` |
+| `pnpm install` | `bun install` |
+| `yarn` / `yarn install` | `bun install` |
+| `npm run dev` | `bun run dev` or `bun dev` |
+| `npx prettier --write .` | `bunx prettier --write .` |
+| `pnpm add -D vitest` | `bun add -d vitest` |
+| `yarn add lodash` | `bun add lodash` |

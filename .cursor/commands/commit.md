@@ -1,5 +1,7 @@
 # Create a `git` commit with used model(s) as Co-Author(s)
 
+**Hooks**: Pre-commit (Lefthook) runs format/lint when you run `git commit` in the terminal. Cursor hooks (`.cursor/hooks.json`) run the same checks after AI file edits. Commit from the terminal so Lefthook runs.
+
 1. Look at the staged and unstaged changes with `git diff`.
 2. Stage the changes to commit with `git add .`.
 3. Obtain staged changes with `git diff --staged`.
