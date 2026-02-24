@@ -1,0 +1,29 @@
+---
+description: Update API documentation whenever new API endpoints are added
+alwaysApply: true
+---
+
+# Update API Docs When Adding New Endpoints
+
+Whenever you add, change, or remove an API endpoint, update the API documentation in the same change set.
+
+## Where to Update
+
+1. **`docs/api.md`** — Canonical API reference. Add or edit the endpoint with:
+   - Method and path
+   - Query/body parameters (name, type, required, description)
+   - Response shape and status codes
+   - Error responses (4xx, 5xx)
+2. **`backend/README.md`** — API section. Keep the bullet list of endpoints in sync (method, path, and one-line description).
+
+## Guidelines
+
+- **New endpoint** → Add a section in `docs/api.md` and an entry in `backend/README.md` API list.
+- **Changed request/response or status codes** → Update the corresponding section in `docs/api.md` and the README line if the summary changes.
+- **Removed endpoint** → Remove its section from `docs/api.md` and its entry from `backend/README.md`.
+
+## Checklist
+
+1. Adding or changing an endpoint? → Update `docs/api.md` and `backend/README.md` (API section).
+2. Removing an endpoint? → Remove it from both places.
+3. Before considering the work done? → Confirm the docs match the implemented behavior.

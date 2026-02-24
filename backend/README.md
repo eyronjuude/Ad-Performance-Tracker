@@ -29,9 +29,14 @@ python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
 ## API
 
+See **[docs/api.md](../docs/api.md)** for the full API reference (parameters, response shapes, errors).
+
+Quick list:
+
 - `GET /` – Root message
 - `GET /health` – Health check
-- `GET /api/bigquery/sample` – Returns up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
+- `GET /api/bigquery/sample` – Up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
+- `GET /api/bigquery/performance?employee_acronym=<acronym>` – P1 ad performance for the given employee acronym, deduplicated by ad name (spend summed, cROAS spend-weighted average). Requires same BigQuery env vars and table columns: `ad_name`, `spend`, `croas`, `priority`, `employee_acronym`.
 
 ## Environment variables
 
