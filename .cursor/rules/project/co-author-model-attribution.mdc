@@ -30,6 +30,13 @@ Co-authored-by: Claude <noreply@anthropic.com>
 Co-authored-by: Composer <noreply@cursor.com>
 ```
 
+## Cursor agent model name
+
+When the committing agent is Cursor's built-in agent (Composer), use **Composer** as the model name in the co-author line—not "Auto", "Cursor", or "Cursor Composer".
+
+- **Correct**: `Co-authored-by: Composer <noreply@cursor.com>`
+- **Incorrect**: `Co-authored-by: Auto <...>`, `Co-authored-by: Cursor <...>`, `Co-authored-by: Cursor Composer <...>`
+
 ## Guidelines
 
 - **Multiple models**: If more than one model contributed, list each on its own line
