@@ -1,0 +1,72 @@
+---
+description: Test upon implementation of features for backend and frontend
+alwaysApply: true
+---
+
+# Test Upon Feature Implementation
+
+When implementing a new feature, add tests for both backend and frontend as part of the same work—do not leave testing for later.
+
+## Scope
+
+- **Backend**: Unit tests, API/integration tests for new endpoints, services, and business logic.
+- **Frontend**: Unit tests for components, hooks, and utilities; integration tests for user flows where appropriate.
+
+## Guidelines
+
+- **Test with the feature**: Add or update tests in the same change set as the feature implementation.
+- **Both sides**: If a feature touches backend and frontend, add tests to both.
+- **Location**: Colocate tests with the code they cover or follow project conventions (e.g. `__tests__/`, `*.test.ts`, `*_test.py`).
+- **Run tests**: Verify tests pass before considering the feature complete.
+
+## Backend (FastAPI + pytest)
+
+| Tool | Purpose |
+|------|---------|
+| pytest | Test runner |
+| TestClient | In-memory HTTP client for FastAPI (no live server) |
+| pytest fixtures | Reusable setup (app, client, mocked deps) |
+
+**Run**: Activate venv first, then `pytest tests/` or `python -m pytest`
+
+```python
+# backend/tests/conftest.py: provide client fixture
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+@pytest.fixture
+def client() -> TestClient:
+    return TestClient(app)
+
+# backend/tests/test_campaigns.py
+def test_get_campaign_returns_200(client: TestClient) -> None:
+    response = client.get("/api/campaigns/1")
+    assert response.status_code == 200
+    assert "id" in response.json()
+```
+
+## Frontend (TypeScript/React)
+
+| Framework | Typical usage |
+|-----------|---------------|
+| Vitest | `npm run test` or `npx vitest run` |
+| Test patterns | `**/__tests__/**/*.{ts,tsx}`, `**/*.{test,spec}.{ts,tsx}` |
+
+```tsx
+// Example: test new component
+import { render, screen } from "@testing-library/react";
+import { MyComponent } from "./MyComponent";
+
+it("renders expected content", () => {
+  render(<MyComponent />);
+  expect(screen.getByRole("heading")).toHaveTextContent("Expected");
+});
+```
+
+## Checklist
+
+1. Feature implemented? → Add corresponding tests.
+2. Backend change? → Add backend tests.
+3. Frontend change? → Add frontend tests.
+4. Tests written? → Run them and confirm they pass.
