@@ -4,6 +4,9 @@
     "afterFileEdit": [
       { "command": "node .cursor/hooks/after-file-edit-style.js" }
     ],
+    "beforeReadFile": [
+      { "command": "node .cursor/hooks/before-read-file-security.js" }
+    ],
     "beforeShellExecution": [
       { "command": "node .cursor/hooks/before-shell-execution-project.js" }
     ]
