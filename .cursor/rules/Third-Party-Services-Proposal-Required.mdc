@@ -1,0 +1,55 @@
+---
+description: Require a proposal before introducing third-party services
+alwaysApply: true
+---
+
+# Third-Party Services Require a Proposal
+
+Before integrating any **third-party service** or **external API**, a proposal must be written and reviewed. This rule applies to services you call over the network, not to modules you install and import (see Prefer-Established-Modules).
+
+**Scope**: External APIs, SaaS integrations, webhooks, payment gateways, authentication providers, maps, analytics, messaging services, and any other hosted service you call via HTTP/gRPC/WebSocket.
+
+## Guidelines
+
+- **Proposal required**: Every new third-party service integration must be accompanied by a proposal.
+- **Before implementation**: Do not add integrations until the proposal is accepted.
+- **Vet the service**: Only consider services with **good reputation** and **comprehensive documentation**. Prefer established vendors with strong track records, clear docs, and active support.
+- **Proposal contents** should include:
+  - Service name and vendor
+  - Purpose and justification
+  - Pricing and cost implications (if applicable)
+  - Security and data handling (what data is sent where)
+  - SLA, reliability, and vendor reputation
+  - Documentation quality (API reference, guides, SDKs)
+  - Alternatives considered and why this one was chosen
+  - Plan for vendor lock-in mitigation if relevant
+
+## Examples
+
+```markdown
+<!-- ❌ BAD - Implementing without a proposal -->
+Integrating Stripe for payments. (Proceeding directly to code.)
+```
+
+```markdown
+<!-- ✅ GOOD - Proposal first -->
+## Proposal: Stripe for Payment Processing
+
+| Field | Value |
+|-------|-------|
+| Service | Stripe |
+| Purpose | Accept card payments |
+| Pricing | 2.9% + $0.30 per transaction |
+| Data | PCI-compliant; card data never touches our servers |
+| Reputation | Industry standard; SOC 2 Type II certified |
+| Docs | Full API reference, SDKs, and integration guides |
+| Alternatives | PayPal, Square — Stripe chosen for better DX |
+```
+
+## Workflow
+
+1. Identify need for a third-party service.
+2. Draft a proposal (per structure above).
+3. Get proposal reviewed and approved.
+4. Implement integration (URLs via env vars, secrets via env vars).
+5. Document the integration.

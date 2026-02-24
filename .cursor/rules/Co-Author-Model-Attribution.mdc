@@ -1,0 +1,37 @@
+---
+description: Ensure Git commits include Co-authored-by footer for all models involved
+alwaysApply: true
+---
+
+# Co-Author Model Attribution
+
+Whenever an agent performs a Git commit, ensure that the commit footer always contains a `Co-authored-by` line for **every model** involved in the commit.
+
+## Format
+
+Use Git's standard co-author trailer format:
+
+```text
+Co-authored-by: Model Name <model@example.com>
+```
+
+- Add one line per model
+- Place all co-author lines in the commit footer (after a blank line following the body)
+- Include every AI model that contributed to the changes
+
+## Example
+
+```text
+feat(api): add user authentication endpoint
+
+Implements JWT-based login and token refresh.
+
+Co-authored-by: Claude <noreply@anthropic.com>
+Co-authored-by: Composer <noreply@cursor.com>
+```
+
+## Guidelines
+
+- **Multiple models**: If more than one model contributed, list each on its own line
+- **Blank line**: Always leave a blank line between the commit body and the footer
+- **Full attribution**: Do not omit any model that contributed to the commit
