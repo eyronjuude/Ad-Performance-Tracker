@@ -1,0 +1,55 @@
+---
+description: Always update docs or README for codebase summary and review
+alwaysApply: true
+---
+
+# Update Docs or README for Codebase Summary and Review
+
+Keep documentation in sync with the codebase. Whenever you make changes that affect how the project works, add new features, or change architecture, update the relevant docs or README as part of the same work.
+
+## Scope
+
+- **README**: Root-level `README.md`, or `frontend/README.md`, `backend/README.md` for app-specific changes.
+- **Docs**: Any `docs/` folder, API docs, or inline documentation (e.g., docstrings, JSDoc).
+- **Codebase summary**: High-level description of the project, structure, and how to run it.
+- **Review-friendly**: Docs should give reviewers enough context to understand changes without inspecting every file.
+
+## Guidelines
+
+- **Update with changes**: Add or update documentation in the same change set as the feature or fix.
+- **Summary up to date**: Keep the project overview accurate—what it does, how to set it up, and how to run tests.
+- **Architecture changes**: Document new modules, APIs, or patterns; update diagrams or structure sections when relevant.
+- **New dependencies or env vars**: Document in README or `.env.example` (see Ensure-Env-Vars-Present).
+- **Avoid drift**: Remove references to removed features; add entries for new ones.
+
+## What to Document
+
+| Change | Update |
+|--------|--------|
+| New feature or module | README sections, architecture overview |
+| New API endpoint | API docs or README API section |
+| New env variable | `.env.example` and README setup |
+| Setup or run steps changed | README setup/run instructions |
+| New or removed scripts | README commands section |
+
+## Examples
+
+```markdown
+<!-- ❌ BAD - Code changes without doc updates -->
+Add new campaigns API, refactor auth. (README still says "no auth".)
+```
+
+```markdown
+<!-- ✅ GOOD - Docs updated with code -->
+Add campaigns API, refactor auth. Update README:
+- Add "Campaigns" to API section
+- Update auth flow description
+- Add new env vars to setup section
+```
+
+## Checklist
+
+1. Making code changes? → Decide which docs are affected.
+2. New feature or behavior? → Update README or docs.
+3. Setup or run changed? → Update README instructions.
+4. Before considering work done? → Confirm docs reflect current state.
