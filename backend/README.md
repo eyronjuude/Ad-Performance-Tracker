@@ -29,7 +29,7 @@ python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
 ## API
 
-See **[docs/api.md](../docs/api.md)** for the full API reference (parameters, response shapes, errors).
+See **[docs/api.md](../docs/api.md)** for the full API reference (parameters, response shapes, errors). Machine-readable schema: **[docs/openapi.json](../docs/openapi.json)** (regenerate with `python scripts/generate_openapi.py` from this directory when endpoints change).
 
 Quick list:
 

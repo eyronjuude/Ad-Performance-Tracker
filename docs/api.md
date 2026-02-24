@@ -2,6 +2,8 @@
 
 Base URL (local): `http://127.0.0.1:8000`
 
+**OpenAPI schema:** [openapi.json](openapi.json) (regenerate with `python scripts/generate_openapi.py` from the `backend/` directory when endpoints change).
+
 ---
 
 ## General
