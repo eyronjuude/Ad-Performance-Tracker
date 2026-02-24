@@ -9,10 +9,10 @@ pre-commit:
 
     - name: ruff-format
       glob: "backend/**/*.py"
-      run: ruff format {staged_files}
+      run: sh scripts/run_ruff.sh format {staged_files}
       stage_fixed: true
 
     - name: ruff-lint
       glob: "backend/**/*.py"
-      run: ruff check --fix {staged_files}
+      run: sh scripts/run_ruff.sh check --fix {staged_files}
       stage_fixed: true
