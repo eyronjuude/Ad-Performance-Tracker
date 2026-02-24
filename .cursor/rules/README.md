@@ -12,6 +12,4 @@ Rules are organized in subfolders and use **lowercase-with-hyphens** filenames (
 | **style/** | `gitignore-cache-and-downloads.mdc`, `strong-typing-required.mdc`, `use-official-folder-structure.mdc` |
 | **testing/** | `test-on-feature-implementation.mdc` |
 
-## Cursor limitation
-
-Cursor only loads `.mdc` files that are **directly in** `.cursor/rules/`, not in subfolders. Rules in the folders above are for organization; they **will not be applied** unless Cursor adds support for nested rules or you move/copy them to the root of `.cursor/rules/`.
+Rules in subfolders are supported by Cursor per [official documentation](https://docs.cursor.com/context/rules).
