@@ -1,0 +1,45 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Ensure Env Vars Present
+
+When adding or using environment variables, ensure they are declared in the env file (e.g. `.env.example`). If sensitive values are needed, always prompt the user to fill them in—never insert real secrets or credentials yourself.
+
+## Guidelines
+
+- **Declare in template**: Add any new required env variables to `.env.example` (or equivalent) with placeholder or empty values
+- **Document usage**: In the template, briefly document what each variable is for (inline comment or nearby README)
+- **Never fill secrets**: Do not generate, guess, or insert API keys, passwords, tokens, or other sensitive values into env files
+- **Prompt the user**: When env vars are missing or empty and needed for the feature to work, explicitly tell the user:
+  - Which variables are required
+  - Where to add them (e.g. copy `.env.example` to `.env` and fill in values)
+  - That they must supply the sensitive values themselves
+
+## Examples
+
+```markdown
+<!-- ❌ BAD - Agent adds real secrets to .env.example -->
+# .env.example
+API_KEY=sk-1234567890abcdef
+DB_PASSWORD=mySecretPassword
+```
+
+```markdown
+<!-- ✅ GOOD - Declare with placeholders, prompt user for real values -->
+# .env.example
+API_KEY=          # Your API key from the provider dashboard
+DB_PASSWORD=      # Database password
+API_BASE_URL=http://localhost:8000
+```
+
+When the user runs the app and these are empty:
+
+> **Required env vars**: Copy `.env.example` to `.env` and fill in `API_KEY` and `DB_PASSWORD`. Do not commit `.env`.
+
+## Checklist
+
+1. New env var? → Add it to `.env.example` with a placeholder or comment
+2. Sensitive value needed? → Prompt the user to add it to `.env`; never insert it yourself
+3. Running code that needs env vars? → If missing, prompt before failing
