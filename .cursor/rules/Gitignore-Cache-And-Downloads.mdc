@@ -1,0 +1,53 @@
+---
+description: Ensure cache files and downloads are in .gitignore to minimize repo size
+alwaysApply: true
+---
+
+# Gitignore Cache and Downloads
+
+Keep the repository small by excluding cache files, build artifacts, virtual environments, and downloads from version control. Add missing patterns to `.gitignore` (or subdirectory `.gitignore`) before committing.
+
+## Guidelines
+
+- **Check before commit**: Before committing, verify that generated/cache files are ignored.
+- **Add missing patterns**: If a new tool or dependency introduces cache/output directories, add the pattern to `.gitignore`.
+- **Root vs subdirectory**: Prefer a root `.gitignore` for project-wide patterns; use subdirectory `.gitignore` when the pattern is specific to one area.
+
+## Common Patterns to Ignore
+
+| Category | Examples |
+|----------|----------|
+| Python | `__pycache__/`, `*.pyc`, `*.pyo`, `.pytest_cache/`, `.mypy_cache/`, `*.egg-info/`, `dist/`, `.venv/`, `venv/` |
+| Node/JS | `node_modules/`, `.next/`, `build/`, `dist/`, `.parcel-cache/`, `*.tsbuildinfo` |
+| IDE/Editor | `.idea/`, `.vscode/` (if project-specific), `*.swp`, `*.swo` |
+| OS | `.DS_Store`, `Thumbs.db` |
+| Downloads | `downloads/`, `*.zip`, `*.tar.gz` (if user-specific) |
+| Env | `.env`, `.env.local` |
+
+## Examples
+
+```gitignore
+# ❌ BAD - __pycache__ committed because it's not ignored
+# (no __pycache__ in .gitignore)
+
+# ✅ GOOD - Python cache ignored
+__pycache__/
+*.pyc
+.pytest_cache/
+```
+
+```gitignore
+# ❌ BAD - node_modules or build artifacts accidentally committed
+# (missing patterns)
+
+# ✅ GOOD - Dependencies and build outputs ignored
+node_modules/
+/build
+/dist
+```
+
+## Checklist
+
+1. Adding a new language or tool? → Add its cache/output patterns to `.gitignore`.
+2. Seeing untracked `__pycache__`, `.pytest_cache`, or similar? → Add them to `.gitignore`.
+3. Before committing? → Run `git status` and ensure no cache/download files are staged.

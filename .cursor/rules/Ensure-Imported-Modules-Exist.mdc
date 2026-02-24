@@ -1,0 +1,41 @@
+---
+description: Verify imported modules exist and install missing dependencies
+alwaysApply: true
+---
+
+# Ensure Imported Modules Exist
+
+When using an import statement, ensure the module is installed. If it is missing, install it before proceeding—do not leave broken imports or suggest manual installation as a separate step.
+
+## Guidelines
+
+- **Verify before commit**: All imports must resolve to installed packages.
+- **Install immediately**: If an import fails or the module is not in the dependency list, run the appropriate install command.
+- **Use the right package manager**: Match the project's tooling (npm/yarn/pnpm for JS/TS, pip/uv for Python, etc.).
+- **Add to dependency files**: Use `npm install`, `pip install`, etc., so dependencies are recorded in `package.json`, `requirements.txt`, or equivalent.
+
+## Examples
+
+```python
+# ❌ BAD - Import without checking if package is installed
+import httpx  # ModuleNotFoundError if not in requirements.txt
+
+# ✅ GOOD - Add to requirements.txt first, then use
+# pip install httpx  (or uv add httpx)
+import httpx
+```
+
+```javascript
+// ❌ BAD - Import without ensuring package exists
+import { z } from 'zod';  // Error if zod not in package.json
+
+// ✅ GOOD - Run npm install zod first, then use
+// npm install zod  (or yarn add zod, pnpm add zod)
+import { z } from 'zod';
+```
+
+## Checklist
+
+1. Does the import resolve? → If not, install the package.
+2. Is the package in the project's dependency file? → If not, run the install command (not pip install --user or global install).
+3. After adding a dependency, rerun the code or tests to confirm it works.
