@@ -1,0 +1,51 @@
+---
+description: Use official folder structure for frontend/backend; inform when adding custom folders
+globs: frontend/**/*, backend/**/*
+alwaysApply: false
+---
+
+# Use Official Folder Structure
+
+Use folder structure that follows **official documentation** for the framework you are working in.
+
+## Which structure to use
+
+- **When working in `backend/`** → Use the **backend** (Python/FastAPI) folder structure from official docs.
+- **When working in `frontend/`** → Use the **frontend** (Next.js) folder structure from official docs.
+
+Do not mix or apply the other side's structure (e.g. do not use Next.js layout when adding backend code).
+
+## Reference
+
+- **Frontend**: [Next.js project structure](https://nextjs.org/docs/app/getting-started/project-structure)
+- **Backend**: [FastAPI project structure](https://fastapi.tiangolo.com/tutorial/bigger-applications/) and Python conventions
+
+## Guidelines
+
+1. **Prefer official layout**: When adding or reorganizing code in `frontend/` or `backend/`, use the directories and naming that side's framework docs recommend (e.g. in frontend: Next.js `app/`, `components/`, `lib/`; in backend: FastAPI `routers/`, `models/`, etc.).
+2. **Check docs first**: Before introducing a new top-level or important folder, confirm it matches or is recommended by the framework's official docs.
+3. **Custom folders**: If you introduce folders that are **not** from the official documentation (e.g. custom `services/`, `features/`, or project-specific layouts), **always inform the user** in your response:
+   - Name the folder(s) you added or changed
+   - Briefly explain why it's custom (e.g. "Not in Next.js defaults; added for shared hooks")
+
+## Examples
+
+```markdown
+<!-- ✅ GOOD - Custom folder, user informed -->
+Added a custom `frontend/features/` directory for feature-based modules. This is not part of the default Next.js structure; we use it to colocate components and logic per feature.
+```
+
+```markdown
+<!-- ✅ GOOD - Official structure -->
+Using Next.js `app/` and `app/api/` as in the official project structure. No custom top-level folders added.
+```
+
+```markdown
+<!-- ❌ BAD - Custom folder without telling the user -->
+Created `backend/domain/` and `backend/ports/` for hexagonal layout. (User was not informed.)
+```
+
+## Checklist
+
+- Adding or changing folders? → Prefer structure from framework docs.
+- Using a folder not in official docs? → Tell the user what you added and why.
