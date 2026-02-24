@@ -12,7 +12,8 @@ Hook scripts are **mapped by event and rule folder**: each script enforces all r
 | Event | Rule folder | Script | Rules enforced |
 |-------|-------------|--------|----------------|
 | `afterFileEdit` | **style/** | `after-file-edit-style.js` | Format/lint on edited files (Prettier frontend, Ruff backend); aligns with pre-commit. |
-| `beforeShellExecution` | **project/** | `before-shell-execution-project.js` | `use-bun-not-npm-pnpm`: block npm, pnpm, yarn, npx, pnpx; require bun. |
+| `beforeReadFile` | **security/** | `before-read-file-security.js` | `no-exposed-secrets`: deny reading `.env`, `.env.local` (and similar); allow `.env.example`. |
+| `beforeShellExecution` | **project/** | `before-shell-execution-project.js` | `use-bun-not-npm-pnpm`: block npm, pnpm, yarn, npx, pnpx; require bun. `terminal-virtual-environment`: ask to use venv when running pip/python/pytest/uv without venv in path. |
 
 ## Adding enforcement for a new rule
 
