@@ -1,0 +1,42 @@
+---
+description: Enforce conventional commit format for all Git commits
+alwaysApply: true
+---
+
+# Ensure Conventional Commit Standards
+
+Whenever an agent or a user performs a Git commit, ensure the commit strictly follows [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+
+## Format
+
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+## Rules
+
+- **Type**: Required. Use `feat` for new features, `fix` for bug fixes. Other allowed types: `build`, `chore`, `ci`, `docs`, `style`, `refactor`, `perf`, `test`.
+- **Scope** (optional): Noun in parentheses, e.g. `feat(api):`.
+- **Description**: Short, imperative summary after the colon and space.
+- **Breaking change**: Use `!` after type/scope or footer `BREAKING CHANGE:`.
+
+## Examples
+
+```text
+# BAD
+Fixed the bug
+updated stuff
+WIP: changes
+
+# GOOD
+fix: resolve null pointer in user lookup
+feat(auth): add OAuth2 login
+docs: correct spelling of CHANGELOG
+feat!: remove deprecated API
+
+BREAKING CHANGE: use new endpoint instead
+```

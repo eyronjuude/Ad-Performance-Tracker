@@ -1,0 +1,34 @@
+---
+description: 
+alwaysApply: true
+---
+
+# No Exposed API URLs
+
+Never hardcode API base URLs, endpoints, or service URLs in the codebase. Always use environment variables so that URLs can be configured per environment (dev, staging, prod) and remain out of version control when they are sensitive.
+
+## Guidelines
+
+- Use environment variables (e.g. `VITE_API_URL`, `NEXT_PUBLIC_API_URL`, `API_BASE_URL`) for all API base URLs
+- Store defaults only in `.env.example` or similar template files, never in committed `.env`
+- Never commit `.env` files that contain real URLs
+
+## Examples
+
+```javascript
+// ❌ BAD
+const API_URL = 'https://api.example.com/v1';
+fetch('https://api.example.com/v1/users');
+
+// ✅ GOOD
+const API_URL = import.meta.env.VITE_API_URL ?? process.env.API_URL;
+fetch(`${API_URL}/users`);
+```
+
+```javascript
+// ❌ BAD
+const endpoint = 'https://staging.api.myapp.com/data';
+
+// ✅ GOOD
+const endpoint = `${process.env.REACT_APP_API_BASE_URL}/data`;
+```

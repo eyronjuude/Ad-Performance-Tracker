@@ -1,0 +1,46 @@
+---
+description: 
+alwaysApply: true
+---
+
+# No Unsanitized User Inputs
+
+Never trust user input. Sanitize or escape all user-provided data before rendering, storing, or passing it to other systems (database, shell, APIs).
+
+## Guidelines
+
+- **Treat all user input as untrusted**: Form fields, query params, headers, URL path segments, file uploads, request body
+- **Context determines method**: Use the right escaping for where data is used (HTML, SQL, shell, URLs)
+- **Validate and sanitize on both client and server**: Client-side is UX; server-side is mandatory for security
+- **Never concatenate user input** into SQL, shell commands, or HTML without escaping
+
+## Examples
+
+```javascript
+// ❌ BAD - XSS risk when rendering user content
+element.innerHTML = userInput;
+<div dangerouslySetInnerHTML={{ __html: userInput }} />
+
+// ✅ GOOD - React escapes by default; use DOMPurify when raw HTML is required
+<div>{userInput}</div>
+<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />
+```
+
+```javascript
+// ❌ BAD - SQL injection risk
+db.query(`SELECT * FROM users WHERE id = '${userId}'`);
+
+// ✅ GOOD - Use parameterized queries
+db.query('SELECT * FROM users WHERE id = ?', [userId]);
+// or
+db.query({ text: 'SELECT * FROM users WHERE id = $1', values: [userId] });
+```
+
+```javascript
+// ❌ BAD - Shell injection risk
+exec(`rm ${userFileName}`);
+
+// ✅ GOOD - Use proper escaping or spawn with args array
+import { execFile } from 'child_process';
+execFile('rm', [userFileName]);
+```

@@ -1,0 +1,84 @@
+---
+description: Require strong typing for variables, parameters, and return values
+globs: "**/*.ts,**/*.tsx,**/*.py"
+alwaysApply: false
+---
+
+# Strong Typing Required
+
+Whenever you introduce a variable, parameter, return value, or similar construct, use explicit, strong types. Avoid `any`, untyped parameters, or implicit types.
+
+**Scope**: TypeScript/TSX and Python.
+
+## Guidelines
+
+- **TypeScript**: Use explicit type annotations for function parameters and return values; prefer `unknown` over `any` when the type is truly unknown.
+- **Python**: Use type hints for parameters and return values (Python 3.10+ built-in syntax or `typing`); type checking enforced by **Pyright** (`pyrightconfig.json`).
+
+## TypeScript Examples
+
+```typescript
+// ❌ BAD
+function fetchUser(id) {
+  return api.get(`/users/${id}`);
+}
+const data = fetchUser(1);
+
+// ✅ GOOD
+function fetchUser(id: string): Promise<User> {
+  return api.get<User>(`/users/${id}`);
+}
+const data: Promise<User> = fetchUser("1");
+```
+
+```typescript
+// ❌ BAD
+const handleSubmit = (e) => { ... };
+
+// ✅ GOOD
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => { ... };
+```
+
+```typescript
+// ❌ BAD - any escapes type checking
+const result: any = parseResponse(json);
+
+// ✅ GOOD - unknown requires narrowing
+const result: unknown = parseResponse(json);
+if (isValidUser(result)) {
+  result satisfies User;
+}
+```
+
+## Python Examples
+
+```python
+# ❌ BAD
+def fetch_user(id):
+    return api.get(f"/users/{id}")
+
+# ✅ GOOD
+def fetch_user(id: str) -> User:
+    return api.get(f"/users/{id}")
+```
+
+```python
+# ❌ BAD
+def process(items):
+    for item in items:
+        ...
+
+# ✅ GOOD
+from typing import Any
+
+def process(items: list[dict[str, Any]]) -> None:
+    for item in items:
+        ...
+```
+
+## Checklist
+
+1. Every new function has typed parameters and return value.
+2. Variables that hold non-obvious types have explicit annotations.
+3. Avoid `any` (TypeScript) or untyped parameters (Python).
+4. Use `unknown` (TS) or `Any` (Python) only when necessary, then narrow or validate.

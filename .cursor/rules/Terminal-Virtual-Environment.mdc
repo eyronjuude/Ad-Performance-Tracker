@@ -1,0 +1,26 @@
+---
+description: Ensure terminal opens in virtual environment
+alwaysApply: true
+---
+
+# Terminal Virtual Environment
+
+Whenever a terminal is opened or shell commands are run in this workspace, ensure the Python virtual environment is active.
+
+## Guidelines
+
+- **Activate venv first**: When opening a new terminal or running Python-dependent commands, activate the virtual environment before other commands.
+- **Preferred paths** (check project root): `.venv` or `venv`
+
+### Activation commands
+
+| Platform | Command |
+|----------|---------|
+| Windows (PowerShell) | `.\venv\Scripts\Activate.ps1` or `.\.venv\Scripts\Activate.ps1` |
+| Windows (CMD) | `venv\Scripts\activate.bat` or `.venv\Scripts\activate.bat` |
+| Unix / macOS | `source venv/bin/activate` or `source .venv/bin/activate` |
+
+### When the agent runs shell commands
+
+- Run the appropriate activation command before `pip`, `python`, `pytest`, or other Python tools
+- Or use the venv's executable directly, e.g. `.\venv\Scripts\python.exe -m pytest` (Windows)

@@ -1,0 +1,48 @@
+---
+description: Prefer well-supported modules over custom implementations
+alwaysApply: true
+---
+
+# Always Check Existing Modules for Solutions
+
+Before implementing a solution manually, check whether existing **modules** (packages you install and import) already solve the problem. Most development challenges have been addressed by the ecosystem.
+
+**Scope**: This rule applies to **modules** (e.g., npm packages, pip packages, NuGet packages)—code you add as dependencies. It does **not** apply to external APIs or third-party services; those are handled separately.
+
+## Guidelines
+
+- **Search first**: Before writing custom code for common problems (validation, date handling, HTTP clients, state management, crypto utilities, etc.), search for established modules.
+- **Vet modules**: Prefer modules with:
+  - Large community support (GitHub stars, downloads, active maintenance)
+  - Good documentation and positive community reception
+  - Regular updates and security fixes
+- **Fallback to manual**: If no suitable module exists, or the module does not fully fit the solution (overkill, poor fit, unmaintained), implement the solution manually instead of forcing a mismatch.
+
+## Examples
+
+```javascript
+// ❌ BAD - Reinventing date formatting when date-fns or dayjs exists
+function formatDate(d) {
+  const m = d.getMonth() + 1;
+  return `${d.getFullYear()}-${m < 10 ? '0' + m : m}-${d.getDate()}`;
+}
+
+// ✅ GOOD - Use a well-supported module (date-fns, dayjs, etc.)
+import { format } from 'date-fns';
+format(new Date(), 'yyyy-MM-dd');
+```
+
+```javascript
+// ❌ BAD - Using a niche module with 200 stars and no recent commits for critical functionality
+import obscureValidation from 'obscure-validation-lib';
+
+// ✅ GOOD - Use zod, yup, or joi for validation; implement manually if none fit
+import { z } from 'zod';
+const schema = z.object({ email: z.string().email() });
+```
+
+## Checklist
+
+1. Is this a common problem? → Search for established modules.
+2. Does the module have strong community support? → Prefer it.
+3. Does the module fully fit our needs? → If yes, use it; if no, implement manually.
