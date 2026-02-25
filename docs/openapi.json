@@ -38,7 +38,7 @@
           "bigquery"
         ],
         "summary": "Get Performance",
-        "description": "Return deduplicated ad performance for P1 campaigns by employee acronym.\nSame ad_name merged: spend summed, cROAS spend-weighted average.\nRequires GCP_PROJECT, BIGQUERY_DATASET, BIGQUERY_TABLE.",
+        "description": "Return deduplicated ad performance for P1 campaigns by employee acronym.\n\n- P1: substring in ad_name (e.g. MP1, RRL - P1).\n- employee_acronym: word in adset_name, surrounded by non-letters only (e.g. _HM_ matches HM; CPA does not match CP).\nSame (ad_name, adset_name) merged: spend summed, cROAS spend-weighted average.\nRequires GCP_PROJECT, BIGQUERY_DATASET, BIGQUERY_TABLE.",
         "operationId": "get_performance_api_bigquery_performance_get",
         "parameters": [
           {
@@ -48,10 +48,10 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Employee acronym to filter by",
+              "description": "Employee acronym to filter by (must appear as word in adset_name, surrounded by non-letters)",
               "title": "Employee Acronym"
             },
-            "description": "Employee acronym to filter by"
+            "description": "Employee acronym to filter by (must appear as word in adset_name, surrounded by non-letters)"
           }
         ],
         "responses": {
@@ -168,6 +168,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",
