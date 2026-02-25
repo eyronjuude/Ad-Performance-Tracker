@@ -1,5 +1,6 @@
 """BigQuery sample and performance data API."""
 
+import json
 import os
 import re
 from datetime import date, datetime, time
@@ -8,6 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 router = APIRouter(prefix="/bigquery", tags=["bigquery"])
 
@@ -18,6 +20,20 @@ COL_AD_NAME = "ad_name"
 COL_ADSET_NAME = "adset_name"
 COL_SPEND = "spend_sum"
 COL_REVENUE = "placed_order_total_revenue_sum_direct_session"  # cROAS = revenue / spend
+
+
+def _get_bigquery_credentials():
+    """
+    Resolve credentials for BigQuery.
+    - If GOOGLE_CREDENTIALS_JSON is set: use JSON from env (for Railway/serverless).
+    - Else if GOOGLE_APPLICATION_CREDENTIALS is set: use file path (standard).
+    - Else: use Application Default Credentials.
+    """
+    credentials_json = os.environ.get("GOOGLE_CREDENTIALS_JSON", "").strip()
+    if credentials_json:
+        info = json.loads(credentials_json)
+        return service_account.Credentials.from_service_account_info(info)
+    return None
 
 
 def _json_serial(value: Any) -> Any:
@@ -45,7 +61,10 @@ def get_bigquery_client() -> bigquery.Client:
             status_code=503,
             detail="GCP_PROJECT is not set; BigQuery is not configured",
         )
+    credentials = _get_bigquery_credentials()
     try:
+        if credentials:
+            return bigquery.Client(project=project, credentials=credentials)
         return bigquery.Client(project=project)
     except Exception as e:
         raise HTTPException(

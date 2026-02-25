@@ -47,7 +47,8 @@ Quick list:
 | `GCP_PROJECT` | GCP project ID for BigQuery |
 | `BIGQUERY_DATASET` | BigQuery dataset name |
 | `BIGQUERY_TABLE` | BigQuery table name |
-| `GOOGLE_APPLICATION_CREDENTIALS` | (Optional) Path to service account JSON key; if unset, Application Default Credentials are used |
+| `GOOGLE_CREDENTIALS_JSON` | (Optional) Service account JSON as string; use for Railway/serverless when no file path is available |
+| `GOOGLE_APPLICATION_CREDENTIALS` | (Optional) Path to service account JSON file; used when GOOGLE_CREDENTIALS_JSON is not set |
 | `DATABASE_URL` | (Optional) Postgres connection string (e.g. from Vercel/Neon). When set, used for settings. |
 | `DATABASE_PATH` | (Optional) SQLite file path when DATABASE_URL is not set. Default: `backend/data/settings.db` |
 
