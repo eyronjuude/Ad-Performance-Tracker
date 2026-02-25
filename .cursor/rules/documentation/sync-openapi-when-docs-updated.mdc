@@ -1,0 +1,42 @@
+---
+description: Regenerate OpenAPI JSON when API or endpoint docs are updated
+globs: docs/**/*.md,**/README.md
+alwaysApply: false
+---
+
+# Sync OpenAPI When Docs Are Updated
+
+Whenever you update API-related documentation, regenerate the machine-readable OpenAPI schema so it stays in sync.
+
+## When to Regenerate
+
+- You edit **`docs/api.md`** (endpoints, parameters, responses, errors).
+- You change the **API section** of any **README** (e.g. `backend/README.md`).
+- You change endpoint behavior or descriptions in docs without changing code (e.g. fixing doc typos or clarifying request/response).
+
+## How to Regenerate
+
+From the **backend** directory:
+
+```bash
+python scripts/generate_openapi.py
+```
+
+This overwrites **`docs/openapi.json`**. Do not edit `docs/openapi.json` by hand.
+
+## Examples
+
+```markdown
+<!-- ❌ BAD - Doc update without refreshing OpenAPI -->
+Updated docs/api.md with new query params for GET /campaigns. (openapi.json left stale.)
+```
+
+```markdown
+<!-- ✅ GOOD - Docs and OpenAPI updated together -->
+Updated docs/api.md with new query params; ran `python scripts/generate_openapi.py` from backend/ so docs/openapi.json is in sync.
+```
+
+## Checklist
+
+1. Edited API docs or README API section? → Run `python scripts/generate_openapi.py` from `backend/`.
+2. Before considering doc work done? → Confirm `docs/openapi.json` reflects the documented API.
