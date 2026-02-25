@@ -60,12 +60,7 @@ export default function Home() {
       );
     };
     void loadAll();
-  }, [
-    employees
-      .map((e) => e.acronym)
-      .sort()
-      .join(","),
-  ]);
+  }, [employees]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
