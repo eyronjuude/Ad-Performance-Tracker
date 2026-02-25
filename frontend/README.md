@@ -1,22 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the frontend for the Ad Performance Tracker, built with [Next.js](https://nextjs.org).
 
 ## Getting Started
 
-First, run the development server:
+1. Copy `frontend/.env.example` to `frontend/.env` and set `NEXT_PUBLIC_API_URL` if the backend runs elsewhere (default: `http://127.0.0.1:8000`).
+2. Run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open [http://localhost:3000](http://localhost:3000) to view the P1 Ad Performance Dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
+
+- **/** — P1 Ad Performance Dashboard (also linked as “Dashboard” in sidebar)
+- **/settings** — Configure employee name ↔ acronym mapping, Spend (AUD) and cROAS evaluation thresholds, and other options
+- **/dashboard** — Redirects to /
+- **/ads** — Ads detail page (placeholder; full implementation pending)
+
+## Sidebar
+
+The app includes a sidebar for navigation between Dashboard and Settings. Settings are stored in the backend (SQLite) and shared across all users. Ensure the backend is running and `NEXT_PUBLIC_API_URL` points to it.
+
+## Configuration
+
+- **Employees**: Edit `lib/config.ts` (`EMPLOYEES`) to add or change employees.
+- **Evaluation keys**: Edit `lib/config.ts` (`SPEND_EVALUATION_KEY`, `CROAS_EVALUATION_KEY`) to adjust spend and CROAS thresholds and colors.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

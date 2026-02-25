@@ -84,3 +84,38 @@ Rows are ordered by `spend` descending.
 - `503 Service Unavailable` — BigQuery not configured or client creation failed.
 
 **Table schema:** The BigQuery table must include columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session`. cROAS is computed as `placed_order_total_revenue_sum_direct_session / spend_sum` (aggregated as `SUM(placed_order_total_revenue_sum_direct_session) / SUM(spend_sum)` when merged). See [BigQuery proposal](proposals/bigquery.md) for details.
+
+---
+
+## Settings
+
+App settings (employee mapping, evaluation thresholds, periods) are stored in SQLite and shared across all users. The database file path is configurable via `DATABASE_PATH` (default: `backend/data/settings.db`).
+
+### `GET /api/settings`
+
+Returns the current app settings.
+
+**Response:** `200 OK` — JSON object:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `employees` | array | `{acronym, name}` pairs for BigQuery filter → display mapping |
+| `spendEvaluationKey` | array | `{min, max, color}` thresholds for spend (AUD) |
+| `croasEvaluationKey` | array | `{min, max, color}` thresholds for cROAS |
+| `periods` | array | Period labels (e.g. `["P1", "P2"]`) |
+
+If no settings exist, returns defaults.
+
+**Errors:** `500 Internal Server Error` — Database or JSON error.
+
+---
+
+### `PUT /api/settings`
+
+Replaces stored settings with the request body.
+
+**Request body:** Same shape as `GET` response (employees, spendEvaluationKey, croasEvaluationKey, periods).
+
+**Response:** `200 OK` — The saved settings.
+
+**Errors:** `400 Bad Request` — Invalid JSON or save failed.
