@@ -37,7 +37,7 @@ Quick list:
 - `GET /health` – Health check
 - `GET /api/bigquery/sample` – Up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
 - `GET /api/bigquery/performance?employee_acronym=<acronym>` – P1 ad performance for the given employee acronym, deduplicated by ad name and adset name (spend summed, cROAS spend-weighted average). Returns `ad_name`, `adset_name`, `spend`, `croas`. P1 = substring in `ad_name`; acronym = word in `adset_name` (surrounded by non-letters only). Requires BigQuery env vars and table columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session` (cROAS = revenue / spend).
-- `GET /api/settings` – App settings (employees, evaluation thresholds, periods). Stored in SQLite; shared across users.
+- `GET /api/settings` – App settings (employees, evaluation thresholds, periods). Stored in Postgres (Neon) or SQLite; shared across users.
 - `PUT /api/settings` – Update app settings. Request body: same shape as GET response.
 
 ## Environment variables
@@ -48,7 +48,8 @@ Quick list:
 | `BIGQUERY_DATASET` | BigQuery dataset name |
 | `BIGQUERY_TABLE` | BigQuery table name |
 | `GOOGLE_APPLICATION_CREDENTIALS` | (Optional) Path to service account JSON key; if unset, Application Default Credentials are used |
-| `DATABASE_PATH` | (Optional) Path to SQLite file for settings. Default: `backend/data/settings.db` |
+| `DATABASE_URL` | (Optional) Postgres connection string (e.g. from Vercel/Neon). When set, used for settings. |
+| `DATABASE_PATH` | (Optional) SQLite file path when DATABASE_URL is not set. Default: `backend/data/settings.db` |
 
 See `backend/.env.example` for a template.
 

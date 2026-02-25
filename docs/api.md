@@ -89,7 +89,7 @@ Rows are ordered by `spend` descending.
 
 ## Settings
 
-App settings (employee mapping, evaluation thresholds, periods) are stored in SQLite and shared across all users. The database file path is configurable via `DATABASE_PATH` (default: `backend/data/settings.db`).
+App settings (employee mapping, evaluation thresholds, periods) are stored in a database and shared across all users. When `DATABASE_URL` is set (e.g. from Vercel/Neon), Postgres is used. Otherwise SQLite is used via `DATABASE_PATH` (default: `backend/data/settings.db`).
 
 ### `GET /api/settings`
 

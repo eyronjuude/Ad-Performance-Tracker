@@ -1,5 +1,5 @@
 /**
- * Settings API client. Fetches from and saves to the backend (SQLite-backed).
+ * Settings API client. Fetches from and saves to the backend (Postgres or SQLite).
  */
 
 import type { Settings } from "./settings";

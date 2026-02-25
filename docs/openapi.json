@@ -89,7 +89,7 @@
           "settings"
         ],
         "summary": "Get Settings",
-        "description": "Return app settings (employee mapping, evaluation thresholds, periods).\nStored in SQLite; shared across all users.",
+        "description": "Return app settings (employee mapping, evaluation thresholds, periods).\nUses Postgres (Neon) when DATABASE_URL is set, else SQLite.",
         "operationId": "get_settings_api_settings_get",
         "responses": {
           "200": {
@@ -236,6 +236,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",

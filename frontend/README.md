@@ -20,7 +20,7 @@ bun dev
 
 ## Sidebar
 
-The app includes a sidebar for navigation between Dashboard and Settings. Settings are stored in the backend (SQLite) and shared across all users. Ensure the backend is running and `NEXT_PUBLIC_API_URL` points to it.
+The app includes a sidebar for navigation between Dashboard and Settings. Settings are stored in the backend (Postgres/Neon or SQLite) and shared across all users. Ensure the backend is running and `NEXT_PUBLIC_API_URL` points to it.
 
 ## Configuration
 
