@@ -1,6 +1,6 @@
 /**
  * Settings types and defaults.
- * Persistence is handled by the backend API (SQLite); see lib/settings-api.ts.
+ * Persistence is handled by the backend API (Postgres or SQLite); see lib/settings-api.ts.
  */
 
 import type { CroasThreshold, Employee, SpendThreshold } from "@/lib/config";
