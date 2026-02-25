@@ -6,7 +6,11 @@ from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 
 from main import app
-from routers.bigquery import _build_performance_query, get_bigquery_client
+from routers.bigquery import (
+    _acronym_word_regex,
+    _build_performance_query,
+    get_bigquery_client,
+)
 
 
 def test_get_sample_returns_up_to_five_rows(client: TestClient) -> None:
@@ -89,10 +93,10 @@ def test_get_sample_returns_503_when_client_dependency_fails(
 def test_get_performance_returns_200_with_deduplicated_shape(
     client: TestClient,
 ) -> None:
-    """Performance returns 200 with ad_name, spend, croas per row."""
+    """Performance returns 200 with ad_name, adset_name, spend, croas per row."""
     mock_rows = [
-        {"ad_name": "Ad A", "spend": 100.0, "croas": 2.5},
-        {"ad_name": "Ad B", "spend": 50.0, "croas": 1.8},
+        {"ad_name": "Ad A", "adset_name": "Adset X", "spend": 100.0, "croas": 2.5},
+        {"ad_name": "Ad B", "adset_name": "Adset Y", "spend": 50.0, "croas": 1.8},
     ]
     mock_job = MagicMock()
     mock_job.result.return_value = mock_rows
@@ -117,18 +121,20 @@ def test_get_performance_returns_200_with_deduplicated_shape(
     assert len(data) == 2
     assert (
         data[0]["ad_name"] == "Ad A"
+        and data[0]["adset_name"] == "Adset X"
         and data[0]["spend"] == 100.0
         and data[0]["croas"] == 2.5
     )
     assert (
         data[1]["ad_name"] == "Ad B"
+        and data[1]["adset_name"] == "Adset Y"
         and data[1]["spend"] == 50.0
         and data[1]["croas"] == 1.8
     )
 
 
 def test_get_performance_query_uses_filter_and_dedup(client: TestClient) -> None:
-    """Performance query: P1 + employee_acronym filter, dedup by ad_name."""
+    """Performance query: P1 + employee_acronym filter, dedup by ad_name, adset_name."""
     mock_job = MagicMock()
     mock_job.result.return_value = []
     mock_bq = MagicMock()
@@ -149,14 +155,16 @@ def test_get_performance_query_uses_filter_and_dedup(client: TestClient) -> None
         for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
             os.environ.pop(key, None)
 
-    assert "P1" in query or "priority" in query
-    assert "employee_acronym" in query
-    assert "GROUP BY" in query and "ad_name" in query
-    assert "SUM(" in query and "spend" in query
-    assert "SAFE_DIVIDE" in query or "croas" in query
+    assert "p1" in query.lower() and "ad_name" in query
+    assert "adset_name" in query and "REGEXP_CONTAINS" in query
+    assert "GROUP BY" in query and "ad_name" in query and "adset_name" in query
+    assert "SUM(" in query and "spend_sum" in query
+    assert (
+        "SAFE_DIVIDE" in query
+        and "placed_order_total_revenue_sum_direct_session" in query
+    )
     params = {p.name: p.value for p in job_config.query_parameters}
-    assert params.get("acronym") == "XY"
-    assert params.get("priority") == "P1"
+    assert params.get("acronym_regex") == "(^|[^a-zA-Z])xy([^a-zA-Z]|$)"
 
 
 def test_get_performance_requires_employee_acronym(client: TestClient) -> None:
@@ -176,15 +184,23 @@ def test_get_performance_requires_employee_acronym(client: TestClient) -> None:
             os.environ.pop(key, None)
 
 
+def test_acronym_word_regex() -> None:
+    """Acronym regex matches word-boundary only (surrounded by non-letters)."""
+    assert _acronym_word_regex("HM") == "(^|[^a-zA-Z])hm([^a-zA-Z]|$)"
+    assert _acronym_word_regex("CP") == "(^|[^a-zA-Z])cp([^a-zA-Z]|$)"
+
+
 def test_build_performance_query_deduplication_and_blend() -> None:
-    """Query merges by ad_name, sums spend, blend cROAS as spend-weighted avg."""
+    """Query merges by ad_name, adset_name; sums spend; cROAS = revenue/spend."""
     full_table = "`p`.`d`.`t`"
     query = _build_performance_query(full_table)
-    assert "GROUP BY" in query and "ad_name" in query
-    assert "SUM(spend)" in query or "SUM( spend )" in query
+    assert "GROUP BY" in query and "ad_name" in query and "adset_name" in query
+    assert "SUM(spend_sum)" in query or "SUM( spend_sum )" in query
     assert "SAFE_DIVIDE" in query
-    assert "SUM(croas * spend)" in query or "SUM( croas * spend )" in query
+    assert "placed_order_total_revenue_sum_direct_session" in query
     assert "ORDER BY spend DESC" in query
+    assert "adset_name" in query and "REGEXP_CONTAINS" in query
+    assert "%p1%" in query
 
 
 def test_get_performance_returns_503_when_not_configured(client: TestClient) -> None:

@@ -23,8 +23,9 @@ The performance endpoint expects the BigQuery table to include at least these co
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `ad_name` | STRING | Ad or campaign name (used for deduplication) |
-| `spend` | NUMERIC/FLOAT | Spend amount (summed when merging duplicates) |
-| `croas` | NUMERIC/FLOAT | Conversion ROAS (blended as spend-weighted average when merging) |
-| `priority` | STRING | Priority tier (e.g. `P1`); filtered to P1 only |
-| `employee_acronym` | STRING | Owner acronym; filtered by query param |
+| `ad_name` | STRING | Ad or campaign name; P1 filter = substring `P1` present (case-insensitive). Used for deduplication. |
+| `adset_name` | STRING | Ad set name; employee acronym filter = acronym appears as a word (surrounded by non-letters only). |
+| `spend_sum` | NUMERIC/FLOAT | Spend amount (summed when merging duplicates) |
+| `placed_order_total_revenue_sum_direct_session` | NUMERIC/FLOAT | Direct-session attributed order revenue (summed when merging). cROAS = revenue / spend_sum; when merged, `SUM(placed_order_total_revenue_sum_direct_session) / SUM(spend_sum)`. |
+
+Filters are derived from these string columns; there are no separate `priority` or `employee_acronym` columns.

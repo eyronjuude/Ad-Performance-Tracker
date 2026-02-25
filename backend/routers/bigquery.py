@@ -1,6 +1,7 @@
 """BigQuery sample and performance data API."""
 
 import os
+import re
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any
@@ -14,11 +15,9 @@ SAMPLE_LIMIT = 5
 
 # Column names for the ad performance table (used in filtering and deduplication)
 COL_AD_NAME = "ad_name"
-COL_SPEND = "spend"
-COL_CROAS = "croas"
-COL_PRIORITY = "priority"
-COL_EMPLOYEE_ACRONYM = "employee_acronym"
-PRIORITY_P1 = "P1"
+COL_ADSET_NAME = "adset_name"
+COL_SPEND = "spend_sum"
+COL_REVENUE = "placed_order_total_revenue_sum_direct_session"  # cROAS = revenue / spend
 
 
 def _json_serial(value: Any) -> Any:
@@ -92,19 +91,31 @@ def get_sample_rows(
     return out
 
 
+def _acronym_word_regex(acronym: str) -> str:
+    """Build RE2 regex for acronym as word in adset_name (non-letters only)."""
+    escaped = re.escape(acronym.strip().lower())
+    return f"(^|[^a-zA-Z]){escaped}([^a-zA-Z]|$)"
+
+
 def _build_performance_query(full_table: str) -> str:
-    """Build parameterized SQL for P1 + employee_acronym filter and dedup by ad_name."""
-    # Filter: P1 only, specific employee_acronym (param @acronym).
-    # Dedupe: GROUP BY ad_name; SUM(spend); blend cROAS as spend-weighted average.
+    """Build SQL for P1 + employee_acronym filter, dedup by ad_name, adset_name.
+
+    - P1: substring 'P1' in ad_name (case-insensitive; may be surrounded by symbols).
+    - employee_acronym: substring in adset_name as a word—surrounded only by non-letters
+      (e.g. CPA does not match CP; SC_P_HM_US matches HM).
+    """
+    # Filter: P1 in ad_name; acronym as word in adset_name (@acronym_regex).
+    # Dedupe: GROUP BY ad_name, adset_name; SUM(spend); cROAS = SUM(revenue)/SUM(spend).
     return f"""
     SELECT
         {COL_AD_NAME} AS ad_name,
+        {COL_ADSET_NAME} AS adset_name,
         SUM({COL_SPEND}) AS spend,
-        SAFE_DIVIDE(SUM({COL_CROAS} * {COL_SPEND}), SUM({COL_SPEND})) AS croas
+        SAFE_DIVIDE(SUM({COL_REVENUE}), SUM({COL_SPEND})) AS croas
     FROM {full_table}
-    WHERE LOWER(TRIM({COL_PRIORITY})) = LOWER(TRIM(@priority))
-      AND LOWER(TRIM({COL_EMPLOYEE_ACRONYM})) = LOWER(TRIM(@acronym))
-    GROUP BY {COL_AD_NAME}
+    WHERE LOWER({COL_AD_NAME}) LIKE '%p1%'
+      AND REGEXP_CONTAINS(LOWER({COL_ADSET_NAME}), @acronym_regex)
+    GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
     ORDER BY spend DESC
     """
 
@@ -113,12 +124,17 @@ def _build_performance_query(full_table: str) -> str:
 def get_performance(
     client: bigquery.Client = Depends(get_bigquery_client),
     employee_acronym: str = Query(
-        ..., min_length=1, description="Employee acronym to filter by"
+        ...,
+        min_length=1,
+        description="Acronym as word in adset_name (non-letters only)",
     ),
 ) -> list[dict[str, Any]]:
     """
     Return deduplicated ad performance for P1 campaigns by employee acronym.
-    Same ad_name merged: spend summed, cROAS spend-weighted average.
+
+    - P1: substring in ad_name (e.g. MP1, RRL - P1).
+    - employee_acronym: word in adset_name, non-letters only (_HM_ matches HM).
+    Same (ad_name, adset_name) merged: spend summed, cROAS spend-weighted average.
     Requires GCP_PROJECT, BIGQUERY_DATASET, BIGQUERY_TABLE.
     """
     project = os.environ.get("GCP_PROJECT")
@@ -134,12 +150,10 @@ def get_performance(
         )
     full_table = f"`{project}`.`{dataset}`.`{table}`"
     query = _build_performance_query(full_table)
+    acronym_regex = _acronym_word_regex(employee_acronym)
     job_config = bigquery.QueryJobConfig(
         query_parameters=[
-            bigquery.ScalarQueryParameter("priority", "STRING", PRIORITY_P1),
-            bigquery.ScalarQueryParameter(
-                "acronym", "STRING", employee_acronym.strip()
-            ),
+            bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
         ]
     )
     try:

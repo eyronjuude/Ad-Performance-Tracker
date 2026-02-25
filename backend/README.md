@@ -36,7 +36,7 @@ Quick list:
 - `GET /` – Root message
 - `GET /health` – Health check
 - `GET /api/bigquery/sample` – Up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
-- `GET /api/bigquery/performance?employee_acronym=<acronym>` – P1 ad performance for the given employee acronym, deduplicated by ad name (spend summed, cROAS spend-weighted average). Requires same BigQuery env vars and table columns: `ad_name`, `spend`, `croas`, `priority`, `employee_acronym`.
+- `GET /api/bigquery/performance?employee_acronym=<acronym>` – P1 ad performance for the given employee acronym, deduplicated by ad name and adset name (spend summed, cROAS spend-weighted average). Returns `ad_name`, `adset_name`, `spend`, `croas`. P1 = substring in `ad_name`; acronym = word in `adset_name` (surrounded by non-letters only). Requires BigQuery env vars and table columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session` (cROAS = revenue / spend).
 
 ## Environment variables
 
