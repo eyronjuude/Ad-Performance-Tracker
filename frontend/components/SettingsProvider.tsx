@@ -27,8 +27,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
     fetchSettings()
       .then((data) => {
         if (!cancelled) {
