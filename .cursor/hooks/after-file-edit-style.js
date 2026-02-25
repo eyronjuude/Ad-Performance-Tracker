@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
  * Enforces rules in .cursor/rules/style/ for afterFileEdit.
- * Format/lint on edited files (Prettier for frontend, Ruff for backend) — aligns with pre-commit.
+ * Applies the same checks as Lefthook pre-commit (lefthook.yml):
+ *   1. Prettier on frontend files (ts, tsx, js, jsx, mjs, json, css, md)
+ *   2. Ruff format on backend .py files
+ *   3. Ruff check --fix on backend .py files
  * Paths in payload are relative to workspace_roots[0].
  */
 const { spawn } = require("child_process");
@@ -9,7 +12,7 @@ const path = require("path");
 const fs = require("fs");
 
 const FRONTEND_GLOB = /^frontend\/.+\.(ts|tsx|js|jsx|mjs|json|css|md)$/i;
-const BACKEND_PY = /^backend\/.+\\.py$/i;
+const BACKEND_PY = /^backend\/.+\.py$/i;
 
 function resolveRuffBin(projectRoot) {
   const win = path.join(projectRoot, "backend", ".venv", "Scripts", "ruff.exe");
@@ -42,11 +45,14 @@ async function main() {
   if (payload.hook_event_name !== "afterFileEdit") process.exit(0);
 
   const filePath = payload.file_path;
+  if (filePath == null || typeof filePath !== "string" || !filePath.trim()) process.exit(0);
+
   const roots = payload.workspace_roots || [];
   const projectRoot = roots[0] ? path.resolve(roots[0]) : process.cwd();
-  const normalized = path.isAbsolute(filePath)
+  let normalized = path.isAbsolute(filePath)
     ? path.relative(projectRoot, filePath).replace(/\\/g, "/")
     : filePath.replace(/\\/g, "/");
+  if (normalized.startsWith("..")) process.exit(0);
 
   if (FRONTEND_GLOB.test(normalized)) {
     const frontendDir = path.join(projectRoot, "frontend");
@@ -54,11 +60,7 @@ async function main() {
     try {
       await run(frontendDir, "bunx", ["prettier", "--write", relToFrontend]);
     } catch {
-      try {
-        await run(frontendDir, "npx", ["prettier", "--write", relToFrontend]);
-      } catch {
-        // Prettier not available or failed; don't fail the hook
-      }
+      // Prettier not available or failed; don't fail the hook (matches pre-commit: bunx prettier)
     }
     return;
   }
