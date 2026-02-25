@@ -1,0 +1,34 @@
+---
+description: Remove temporary scripts created for manual testing after execution completes
+alwaysApply: true
+---
+
+# Manual Testing Scripts Cleanup
+
+When the user asks for **manual testing** and the agent creates new scripts (e.g., shell scripts, one-off Python/Node scripts) to perform that testing, **delete those scripts as soon as execution completes**.
+
+## Guidelines
+
+- **Scope**: Applies only to scripts the agent creates specifically to run manual tests—not to existing project test scripts or fixtures.
+- **Timing**: Remove the script immediately after it has finished running (success or failure).
+- **Do not leave**: Avoid leaving temporary or throwaway scripts in the repo once the manual test is done.
+
+## Examples
+
+```
+<!-- User: "Can you do some manual testing on the campaigns API?" -->
+<!-- Agent creates scripts/test_campaigns_manual.sh, runs it, verifies output -->
+<!-- Agent deletes scripts/test_campaigns_manual.sh before responding -->
+```
+
+```
+<!-- User: "Manually test the health endpoint" -->
+<!-- Agent creates scripts/check_health.py, runs it -->
+<!-- Agent deletes scripts/check_health.py immediately after -->
+```
+
+## Checklist
+
+1. Created a script for manual testing? → Note its path.
+2. Script execution finished? → Delete the script.
+3. Report results to user without leaving the script behind.
