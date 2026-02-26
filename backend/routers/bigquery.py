@@ -3,6 +3,8 @@
 import json
 import os
 import re
+import threading
+import time as _time
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any
@@ -14,12 +16,12 @@ from google.oauth2 import service_account
 router = APIRouter(prefix="/bigquery", tags=["bigquery"])
 
 SAMPLE_LIMIT = 5
+PERFORMANCE_CACHE_TTL_SECONDS = int(os.environ.get("PERFORMANCE_CACHE_TTL", "300"))
 
-# Column names for the ad performance table (used in filtering and deduplication)
 COL_AD_NAME = "ad_name"
 COL_ADSET_NAME = "adset_name"
 COL_SPEND = "spend_sum"
-COL_REVENUE = "placed_order_total_revenue_sum_direct_session"  # cROAS = revenue / spend
+COL_REVENUE = "placed_order_total_revenue_sum_direct_session"
 
 
 def _get_bigquery_credentials():
@@ -53,24 +55,60 @@ def _json_serial(value: Any) -> Any:
     return value
 
 
+_bq_client: bigquery.Client | None = None
+_bq_client_lock = threading.Lock()
+
+
 def get_bigquery_client() -> bigquery.Client:
-    """Provide a BigQuery client using env-configured project and credentials."""
-    project = os.environ.get("GCP_PROJECT")
-    if not project:
-        raise HTTPException(
-            status_code=503,
-            detail="GCP_PROJECT is not set; BigQuery is not configured",
-        )
-    credentials = _get_bigquery_credentials()
-    try:
-        if credentials:
-            return bigquery.Client(project=project, credentials=credentials)
-        return bigquery.Client(project=project)
-    except Exception as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"BigQuery client failed: {e!s}",
-        ) from e
+    """Return a shared BigQuery client, creating it once on first use."""
+    global _bq_client
+    if _bq_client is not None:
+        return _bq_client
+    with _bq_client_lock:
+        if _bq_client is not None:
+            return _bq_client
+        project = os.environ.get("GCP_PROJECT")
+        if not project:
+            raise HTTPException(
+                status_code=503,
+                detail="GCP_PROJECT is not set; BigQuery is not configured",
+            )
+        credentials = _get_bigquery_credentials()
+        try:
+            if credentials:
+                _bq_client = bigquery.Client(project=project, credentials=credentials)
+            else:
+                _bq_client = bigquery.Client(project=project)
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"BigQuery client failed: {e!s}",
+            ) from e
+        return _bq_client
+
+
+_performance_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+_cache_lock = threading.Lock()
+
+
+def _get_cached_performance(
+    acronym: str,
+) -> list[dict[str, Any]] | None:
+    """Return cached result if present and not expired, else None."""
+    with _cache_lock:
+        entry = _performance_cache.get(acronym)
+        if entry is None:
+            return None
+        cached_at, data = entry
+        if _time.monotonic() - cached_at > PERFORMANCE_CACHE_TTL_SECONDS:
+            del _performance_cache[acronym]
+            return None
+        return data
+
+
+def _set_cached_performance(acronym: str, data: list[dict[str, Any]]) -> None:
+    with _cache_lock:
+        _performance_cache[acronym] = (_time.monotonic(), data)
 
 
 @router.get("/sample", response_model=list[dict[str, Any]])
@@ -151,11 +189,14 @@ def get_performance(
     """
     Return deduplicated ad performance for P1 campaigns by employee acronym.
 
-    - P1: substring in ad_name (e.g. MP1, RRL - P1).
-    - employee_acronym: word in adset_name, non-letters only (_HM_ matches HM).
-    Same (ad_name, adset_name) merged: spend summed, cROAS spend-weighted average.
-    Requires GCP_PROJECT, BIGQUERY_DATASET, BIGQUERY_TABLE.
+    Results are cached in-memory for PERFORMANCE_CACHE_TTL seconds (default 300)
+    to avoid redundant BigQuery round-trips.
     """
+    cache_key = employee_acronym.strip().lower()
+    cached = _get_cached_performance(cache_key)
+    if cached is not None:
+        return cached
+
     project = os.environ.get("GCP_PROJECT")
     dataset = os.environ.get("BIGQUERY_DATASET")
     table = os.environ.get("BIGQUERY_TABLE")
@@ -186,4 +227,6 @@ def get_performance(
     for row in rows:
         raw = dict(row)
         out.append({k: _json_serial(v) for k, v in raw.items()})
+
+    _set_cached_performance(cache_key, out)
     return out
