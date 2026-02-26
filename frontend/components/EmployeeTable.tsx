@@ -159,8 +159,6 @@ export function EmployeeTable({
                       <td className="px-4 py-3">
                         <Link
                           href={`/ads?employee_acronym=${encodeURIComponent(employee.acronym)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="inline-flex items-center rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                         >
                           View Ads
