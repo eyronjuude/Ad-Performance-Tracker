@@ -161,8 +161,6 @@ def _build_performance_query(full_table: str) -> str:
     - employee_acronym: substring in adset_name as a word—surrounded only by non-letters
       (e.g. CPA does not match CP; SC_P_HM_US matches HM).
     """
-    # Filter: P1 in ad_name; acronym as word in adset_name (@acronym_regex).
-    # Dedupe: GROUP BY ad_name, adset_name; SUM(spend); cROAS = SUM(revenue)/SUM(spend).
     return f"""
     SELECT
         {COL_AD_NAME} AS ad_name,
@@ -174,6 +172,33 @@ def _build_performance_query(full_table: str) -> str:
       AND REGEXP_CONTAINS(LOWER({COL_ADSET_NAME}), @acronym_regex)
     GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
     ORDER BY spend DESC
+    """
+
+
+def _build_performance_summary_query(full_table: str) -> str:
+    """Build SQL returning a single-row summary.
+
+    Returns total_spend, blended_croas, row_count by pushing the
+    final aggregation into BigQuery so the backend receives one row
+    instead of materializing thousands of per-ad rows in memory.
+    """
+    return f"""
+    WITH per_ad AS (
+        SELECT
+            {COL_AD_NAME},
+            {COL_ADSET_NAME},
+            SUM({COL_SPEND}) AS spend,
+            SUM({COL_REVENUE}) AS revenue
+        FROM {full_table}
+        WHERE LOWER({COL_AD_NAME}) LIKE '%p1%'
+          AND REGEXP_CONTAINS(LOWER({COL_ADSET_NAME}), @acronym_regex)
+        GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
+    )
+    SELECT
+        COALESCE(SUM(spend), 0) AS total_spend,
+        SAFE_DIVIDE(SUM(revenue), SUM(spend)) AS blended_croas,
+        COUNT(*) AS row_count
+    FROM per_ad
     """
 
 
@@ -230,3 +255,87 @@ def get_performance(
 
     _set_cached_performance(cache_key, out)
     return out
+
+
+_summary_cache: dict[str, tuple[float, dict[str, Any]]] = {}
+_summary_cache_lock = threading.Lock()
+
+
+def _get_cached_summary(acronym: str) -> dict[str, Any] | None:
+    with _summary_cache_lock:
+        entry = _summary_cache.get(acronym)
+        if entry is None:
+            return None
+        cached_at, data = entry
+        if _time.monotonic() - cached_at > PERFORMANCE_CACHE_TTL_SECONDS:
+            del _summary_cache[acronym]
+            return None
+        return data
+
+
+def _set_cached_summary(acronym: str, data: dict[str, Any]) -> None:
+    with _summary_cache_lock:
+        _summary_cache[acronym] = (_time.monotonic(), data)
+
+
+@router.get("/performance/summary")
+def get_performance_summary(
+    client: bigquery.Client = Depends(get_bigquery_client),
+    employee_acronym: str = Query(
+        ...,
+        min_length=1,
+        description="Acronym as word in adset_name (non-letters only)",
+    ),
+) -> dict[str, Any]:
+    """
+    Return aggregated performance summary for P1 campaigns by employee acronym.
+
+    Unlike /performance which returns every ad row, this endpoint pushes the
+    final aggregation into BigQuery and returns a single object with
+    total_spend, blended_croas, and row_count.  This dramatically reduces
+    backend memory usage and network transfer.
+    """
+    cache_key = employee_acronym.strip().lower()
+    cached = _get_cached_summary(cache_key)
+    if cached is not None:
+        return cached
+
+    project = os.environ.get("GCP_PROJECT")
+    dataset = os.environ.get("BIGQUERY_DATASET")
+    table = os.environ.get("BIGQUERY_TABLE")
+    if not project or not dataset or not table:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "BigQuery table not configured: set GCP_PROJECT, "
+                "BIGQUERY_DATASET, BIGQUERY_TABLE"
+            ),
+        )
+    full_table = f"`{project}`.`{dataset}`.`{table}`"
+    query = _build_performance_summary_query(full_table)
+    acronym_regex = _acronym_word_regex(employee_acronym)
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
+        ]
+    )
+    try:
+        query_job = client.query(query, job_config=job_config)
+        rows = list(query_job.result(max_results=1))
+    except Exception as e:
+        raise HTTPException(
+            status_code=502, detail=f"BigQuery request failed: {e!s}"
+        ) from e
+
+    if not rows:
+        result: dict[str, Any] = {
+            "total_spend": 0,
+            "blended_croas": 0,
+            "row_count": 0,
+        }
+    else:
+        raw = dict(rows[0])
+        result = {k: _json_serial(v) for k, v in raw.items()}
+
+    _set_cached_summary(cache_key, result)
+    return result

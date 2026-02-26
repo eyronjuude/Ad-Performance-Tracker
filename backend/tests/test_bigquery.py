@@ -9,6 +9,7 @@ from main import app
 from routers.bigquery import (
     _acronym_word_regex,
     _build_performance_query,
+    _build_performance_summary_query,
     get_bigquery_client,
 )
 
@@ -201,6 +202,102 @@ def test_build_performance_query_deduplication_and_blend() -> None:
     assert "ORDER BY spend DESC" in query
     assert "adset_name" in query and "REGEXP_CONTAINS" in query
     assert "%p1%" in query
+
+
+# --- Performance summary endpoint (aggregated single-row response) ---
+
+
+def test_get_performance_summary_returns_aggregated_result(
+    client: TestClient,
+) -> None:
+    """Summary returns 200 with total_spend, blended_croas, row_count."""
+    mock_rows = [{"total_spend": 150.0, "blended_croas": 2.1, "row_count": 5}]
+    mock_job = MagicMock()
+    mock_job.result.return_value = mock_rows
+    mock_bq = MagicMock()
+    mock_bq.query.return_value = mock_job
+
+    app.dependency_overrides[get_bigquery_client] = lambda: mock_bq
+    os.environ["GCP_PROJECT"] = "p"
+    os.environ["BIGQUERY_DATASET"] = "d"
+    os.environ["BIGQUERY_TABLE"] = "t"
+    try:
+        with client:
+            response = client.get(
+                "/api/bigquery/performance/summary?employee_acronym=ABC"
+            )
+    finally:
+        app.dependency_overrides.clear()
+        for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
+            os.environ.pop(key, None)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_spend"] == 150.0
+    assert data["blended_croas"] == 2.1
+    assert data["row_count"] == 5
+
+
+def test_get_performance_summary_empty_result(client: TestClient) -> None:
+    """Summary returns zeroes when BigQuery returns no rows."""
+    mock_job = MagicMock()
+    mock_job.result.return_value = []
+    mock_bq = MagicMock()
+    mock_bq.query.return_value = mock_job
+
+    app.dependency_overrides[get_bigquery_client] = lambda: mock_bq
+    os.environ["GCP_PROJECT"] = "p"
+    os.environ["BIGQUERY_DATASET"] = "d"
+    os.environ["BIGQUERY_TABLE"] = "t"
+    try:
+        with client:
+            response = client.get(
+                "/api/bigquery/performance/summary?employee_acronym=ZZZ"
+            )
+    finally:
+        app.dependency_overrides.clear()
+        for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
+            os.environ.pop(key, None)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_spend"] == 0
+    assert data["blended_croas"] == 0
+    assert data["row_count"] == 0
+
+
+def test_get_performance_summary_requires_employee_acronym(
+    client: TestClient,
+) -> None:
+    """GET /api/bigquery/performance/summary without acronym returns 422."""
+    mock_bq = MagicMock()
+    app.dependency_overrides[get_bigquery_client] = lambda: mock_bq
+    os.environ["GCP_PROJECT"] = "p"
+    os.environ["BIGQUERY_DATASET"] = "d"
+    os.environ["BIGQUERY_TABLE"] = "t"
+    try:
+        with client:
+            response = client.get("/api/bigquery/performance/summary")
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
+        for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
+            os.environ.pop(key, None)
+
+
+def test_build_performance_summary_query_uses_cte_aggregation() -> None:
+    """Summary query uses a CTE and returns total_spend, blended_croas, row_count."""
+    full_table = "`p`.`d`.`t`"
+    query = _build_performance_summary_query(full_table)
+    assert "WITH per_ad AS" in query
+    assert "SUM(spend)" in query
+    assert "SAFE_DIVIDE" in query
+    assert "COUNT(*)" in query
+    assert "total_spend" in query
+    assert "blended_croas" in query
+    assert "row_count" in query
+    assert "%p1%" in query
+    assert "REGEXP_CONTAINS" in query
 
 
 def test_get_performance_returns_503_when_not_configured(client: TestClient) -> None:
