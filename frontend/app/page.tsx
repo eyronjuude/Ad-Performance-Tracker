@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { EmployeeTable } from "@/components/EmployeeTable";
 import { useSettings } from "@/components/SettingsProvider";
-import {
-  fetchPerformance,
-  aggregatePerformance,
-  type EmployeeAggregates,
-} from "@/lib/api";
+import { fetchPerformanceSummary, type EmployeeAggregates } from "@/lib/api";
 
 interface EmployeeState {
   aggregates: EmployeeAggregates | null;
@@ -53,9 +49,8 @@ export default function Home() {
       await Promise.all(
         employees.map(async (employee) => {
           try {
-            const rows = await fetchPerformance(employee.acronym);
+            const aggregates = await fetchPerformanceSummary(employee.acronym);
             if (cancelled) return;
-            const aggregates = aggregatePerformance(rows);
             setState((prev) => ({
               ...prev,
               [employee.acronym]: {

@@ -4,15 +4,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from main import app
-from routers.bigquery import _performance_cache
+from routers.bigquery import _performance_cache, _summary_cache
 
 
 @pytest.fixture(autouse=True)
 def _clear_performance_cache():
-    """Ensure the in-memory performance cache is empty for each test."""
+    """Ensure the in-memory caches are empty for each test."""
     _performance_cache.clear()
+    _summary_cache.clear()
     yield
     _performance_cache.clear()
+    _summary_cache.clear()
 
 
 @pytest.fixture

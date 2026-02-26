@@ -32,6 +32,31 @@ export async function fetchPerformance(
   return res.json() as Promise<PerformanceRow[]>;
 }
 
+/** Fetch pre-aggregated summary (single row) for an employee acronym. */
+export async function fetchPerformanceSummary(
+  employeeAcronym: string
+): Promise<EmployeeAggregates> {
+  const url = new URL("/api/bigquery/performance/summary", API_BASE);
+  url.searchParams.set("employee_acronym", employeeAcronym);
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      detail.detail ?? `API error: ${res.status} ${res.statusText}`
+    );
+  }
+  const data = (await res.json()) as {
+    total_spend: number;
+    blended_croas: number | null;
+    row_count: number;
+  };
+  return {
+    totalSpend: data.total_spend,
+    blendedCroas: data.blended_croas ?? 0,
+    rowCount: data.row_count,
+  };
+}
+
 /** Aggregate performance rows into totals. Blended CROAS = sum(spend*croas)/sum(spend). */
 export function aggregatePerformance(
   rows: PerformanceRow[]
