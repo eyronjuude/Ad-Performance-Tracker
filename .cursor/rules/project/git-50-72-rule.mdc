@@ -1,0 +1,43 @@
+---
+description: Apply the 50/72 rule for Git commit message formatting
+alwaysApply: true
+---
+
+# The 50/72 Rule of Git
+
+Whenever creating commits, follow the 50/72 rule for commit message formatting.
+
+## Rules
+
+1. **50-character subject line**: Keep the subject line (first line) to **50 characters or fewer**. Summarize the change concisely.
+2. **72-character body lines**: If the commit has a body, wrap each line at **72 characters**. Improves readability in terminals and web UIs.
+
+## Format
+
+```text
+Subject line (≤50 characters)
+
+Body line 1 (each line ≤72 characters)
+Body line 2...
+```
+
+- Separate subject from body with a blank line
+- Strive to explain *why* the change was made, not just *what*
+- Reference work items, tickets, or issues when relevant
+
+## Examples
+
+```text
+# BAD - Subject too long
+feat(api): add comprehensive user authentication with OAuth2 and session management
+
+# GOOD - Subject ≤50 chars
+feat(api): add user auth with OAuth2 and sessions
+
+# BAD - Body line too long
+This commit adds a new endpoint for fetching campaign analytics data with support for date range filtering and aggregation.
+
+# GOOD - Body lines ≤72 chars
+This commit adds a new endpoint for fetching campaign analytics
+data with support for date range filtering and aggregation.
+```
