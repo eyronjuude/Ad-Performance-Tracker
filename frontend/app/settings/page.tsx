@@ -277,28 +277,18 @@ function CroasEvaluationSection() {
 }
 
 export default function SettingsPage() {
-  const { save, error, isLoading } = useSettings();
+  const { error } = useSettings();
 
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
-            Settings
-          </h1>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Configure employee mappings, evaluation thresholds, and other
-            options. Changes are saved automatically.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => save()}
-          disabled={isLoading}
-          className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          {isLoading ? "Loading…" : "Save now"}
-        </button>
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+          Settings
+        </h1>
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+          Configure employee mappings, evaluation thresholds, and other options.
+          Changes are saved automatically.
+        </p>
       </header>
 
       {error != null && (
