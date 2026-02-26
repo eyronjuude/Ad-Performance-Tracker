@@ -81,12 +81,10 @@ function EmployeeMappingSection() {
 function ThresholdRow({
   threshold,
   onUpdate,
-  onRemove,
   colorLabel,
 }: {
   threshold: SpendThreshold | CroasThreshold;
   onUpdate: (updates: Partial<SpendThreshold | CroasThreshold>) => void;
-  onRemove: () => void;
   colorLabel: string;
 }) {
   return (
@@ -113,46 +111,57 @@ function ThresholdRow({
         className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
       />
       <span className="text-sm text-zinc-500">→ {colorLabel}</span>
-      <button
-        type="button"
-        onClick={onRemove}
-        className="text-sm text-red-600 hover:underline dark:text-red-400"
-      >
-        Remove
-      </button>
     </div>
   );
 }
 
+const SPEND_DEFAULTS: [SpendThreshold, SpendThreshold, SpendThreshold] = [
+  { min: 20_000, max: null, color: "green" },
+  { min: 10_000, max: 20_000, color: "yellow" },
+  { min: 0, max: 10_000, color: "red" },
+];
+
+const CROAS_DEFAULTS: [CroasThreshold, CroasThreshold, CroasThreshold] = [
+  { min: 3, max: null, color: "green" },
+  { min: 1, max: 3, color: "yellow" },
+  { min: 0, max: 1, color: "red" },
+];
+
+function getThreeSpendThresholds(
+  key: SpendThreshold[]
+): [SpendThreshold, SpendThreshold, SpendThreshold] {
+  const byColor = {
+    green: key.find((t) => t.color === "green") ?? SPEND_DEFAULTS[0],
+    yellow: key.find((t) => t.color === "yellow") ?? SPEND_DEFAULTS[1],
+    red: key.find((t) => t.color === "red") ?? SPEND_DEFAULTS[2],
+  };
+  return [byColor.green, byColor.yellow, byColor.red];
+}
+
+function getThreeCroasThresholds(
+  key: CroasThreshold[]
+): [CroasThreshold, CroasThreshold, CroasThreshold] {
+  const byColor = {
+    green: key.find((t) => t.color === "green") ?? CROAS_DEFAULTS[0],
+    yellow: key.find((t) => t.color === "yellow") ?? CROAS_DEFAULTS[1],
+    red: key.find((t) => t.color === "red") ?? CROAS_DEFAULTS[2],
+  };
+  return [byColor.green, byColor.yellow, byColor.red];
+}
+
 function SpendEvaluationSection() {
   const { settings, setSettings } = useSettings();
+  const thresholds = getThreeSpendThresholds(settings.spendEvaluationKey);
 
   const updateSpendThreshold = (
     index: number,
     updates: Partial<SpendThreshold>
   ) => {
     setSettings((prev) => {
-      const next = [...prev.spendEvaluationKey];
-      next[index] = { ...next[index], ...updates };
-      return { ...prev, spendEvaluationKey: next };
+      const three = getThreeSpendThresholds(prev.spendEvaluationKey);
+      three[index] = { ...three[index], ...updates };
+      return { ...prev, spendEvaluationKey: three };
     });
-  };
-
-  const addSpendThreshold = () => {
-    setSettings((prev) => ({
-      ...prev,
-      spendEvaluationKey: [
-        ...prev.spendEvaluationKey,
-        { min: 0, max: null, color: "gray" },
-      ],
-    }));
-  };
-
-  const removeSpendThreshold = (index: number) => {
-    setSettings((prev) => ({
-      ...prev,
-      spendEvaluationKey: prev.spendEvaluationKey.filter((_, i) => i !== index),
-    }));
   };
 
   return (
@@ -161,40 +170,21 @@ function SpendEvaluationSection() {
         Spend evaluation thresholds (AUD)
       </h2>
       <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-        Configure spend ranges and their display colors (green, yellow, red).
+        Three intervals (Red, Yellow, Green). Edit only the min/max values.
       </p>
       <div className="space-y-3">
-        {settings.spendEvaluationKey.map((t, i) => (
+        {thresholds.map((t, i) => (
           <div key={i} className="flex items-center gap-2">
-            <select
-              value={t.color}
-              onChange={(e) =>
-                updateSpendThreshold(i, {
-                  color: e.target.value as SpendThreshold["color"],
-                })
-              }
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-            >
-              <option value="green">Green</option>
-              <option value="yellow">Yellow</option>
-              <option value="red">Red</option>
-              <option value="gray">Gray</option>
-            </select>
+            <span className="w-16 text-sm font-medium text-zinc-700 capitalize dark:text-zinc-300">
+              {t.color}:
+            </span>
             <ThresholdRow
               threshold={t}
               onUpdate={(u) => updateSpendThreshold(i, u)}
-              onRemove={() => removeSpendThreshold(i)}
               colorLabel={t.color}
             />
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addSpendThreshold}
-          className="rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
-        >
-          + Add threshold
-        </button>
       </div>
     </section>
   );
@@ -202,33 +192,17 @@ function SpendEvaluationSection() {
 
 function CroasEvaluationSection() {
   const { settings, setSettings } = useSettings();
+  const thresholds = getThreeCroasThresholds(settings.croasEvaluationKey);
 
   const updateCroasThreshold = (
     index: number,
     updates: Partial<CroasThreshold>
   ) => {
     setSettings((prev) => {
-      const next = [...prev.croasEvaluationKey];
-      next[index] = { ...next[index], ...updates };
-      return { ...prev, croasEvaluationKey: next };
+      const three = getThreeCroasThresholds(prev.croasEvaluationKey);
+      three[index] = { ...three[index], ...updates };
+      return { ...prev, croasEvaluationKey: three };
     });
-  };
-
-  const addCroasThreshold = () => {
-    setSettings((prev) => ({
-      ...prev,
-      croasEvaluationKey: [
-        ...prev.croasEvaluationKey,
-        { min: 0, max: null, color: "gray" },
-      ],
-    }));
-  };
-
-  const removeCroasThreshold = (index: number) => {
-    setSettings((prev) => ({
-      ...prev,
-      croasEvaluationKey: prev.croasEvaluationKey.filter((_, i) => i !== index),
-    }));
   };
 
   return (
@@ -237,40 +211,21 @@ function CroasEvaluationSection() {
         cROAS evaluation thresholds
       </h2>
       <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-        Configure cROAS ranges and their display colors (green, yellow, red).
+        Three intervals (Red, Yellow, Green). Edit only the min/max values.
       </p>
       <div className="space-y-3">
-        {settings.croasEvaluationKey.map((t, i) => (
+        {thresholds.map((t, i) => (
           <div key={i} className="flex items-center gap-2">
-            <select
-              value={t.color}
-              onChange={(e) =>
-                updateCroasThreshold(i, {
-                  color: e.target.value as CroasThreshold["color"],
-                })
-              }
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-            >
-              <option value="green">Green</option>
-              <option value="yellow">Yellow</option>
-              <option value="red">Red</option>
-              <option value="gray">Gray</option>
-            </select>
+            <span className="w-16 text-sm font-medium text-zinc-700 capitalize dark:text-zinc-300">
+              {t.color}:
+            </span>
             <ThresholdRow
               threshold={t}
               onUpdate={(u) => updateCroasThreshold(i, u)}
-              onRemove={() => removeCroasThreshold(i)}
               colorLabel={t.color}
             />
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addCroasThreshold}
-          className="rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
-        >
-          + Add threshold
-        </button>
       </div>
     </section>
   );
