@@ -15,7 +15,6 @@ import { getDefaultSettings } from "@/lib/settings";
 const SettingsContext = createContext<{
   settings: Settings;
   setSettings: (settings: Settings | ((prev: Settings) => Settings)) => void;
-  save: () => void;
   error: string | null;
   isLoading: boolean;
 } | null>(null);
@@ -48,13 +47,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const save = useCallback(() => {
-    setError(null);
-    saveSettingsApi(settings).catch((e) => {
-      setError(e instanceof Error ? e.message : "Failed to save settings");
-    });
-  }, [settings]);
-
   const setSettings = useCallback(
     (value: Settings | ((prev: Settings) => Settings)) => {
       setError(null);
@@ -71,7 +63,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SettingsContext.Provider
-      value={{ settings, setSettings, save, error, isLoading }}
+      value={{ settings, setSettings, error, isLoading }}
     >
       {children}
     </SettingsContext.Provider>
