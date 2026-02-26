@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmployeeTable } from "@/components/EmployeeTable";
 import { useSettings } from "@/components/SettingsProvider";
 import {
@@ -17,7 +17,15 @@ interface EmployeeState {
 
 export default function Home() {
   const { settings } = useSettings();
-  const employees = settings.employees.filter((e) => e.acronym.trim() !== "");
+  const employees = useMemo(
+    () => settings.employees.filter((e) => e.acronym.trim() !== ""),
+    [settings.employees]
+  );
+
+  const acronymKey = useMemo(
+    () => employees.map((e) => e.acronym).join(","),
+    [employees]
+  );
 
   const [state, setState] = useState<Record<string, EmployeeState>>(() =>
     Object.fromEntries(
@@ -30,11 +38,23 @@ export default function Home() {
 
   useEffect(() => {
     if (employees.length === 0) return;
+
+    setState(
+      Object.fromEntries(
+        employees.map((e) => [
+          e.acronym,
+          { aggregates: null, error: null, isLoading: true },
+        ])
+      )
+    );
+
+    let cancelled = false;
     const loadAll = async () => {
       await Promise.all(
         employees.map(async (employee) => {
           try {
             const rows = await fetchPerformance(employee.acronym);
+            if (cancelled) return;
             const aggregates = aggregatePerformance(rows);
             setState((prev) => ({
               ...prev,
@@ -45,6 +65,7 @@ export default function Home() {
               },
             }));
           } catch (err) {
+            if (cancelled) return;
             const message =
               err instanceof Error ? err.message : "Failed to load data";
             setState((prev) => ({
@@ -60,7 +81,11 @@ export default function Home() {
       );
     };
     void loadAll();
-  }, [employees]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [acronymKey]);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
