@@ -117,7 +117,6 @@ function EmployeeMappingSection() {
                 </select>
 
                 <label className="flex flex-col gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                  <span>Start – Review date</span>
                   <DateRangePicker
                     startDate={emp.startDate}
                     endDate={emp.reviewDate}
@@ -125,7 +124,11 @@ function EmployeeMappingSection() {
                       updateEmployee(i, { startDate, reviewDate: endDate })
                     }
                     disabled={datesDisabled}
-                    placeholder="Pick start and review dates"
+                    placeholder={
+                      isTenured
+                        ? "Not required for tenured employees"
+                        : "Pick start and review dates for probation period"
+                    }
                     id={`employee-${i}-date-range`}
                     aria-label="Start and review date range"
                   />

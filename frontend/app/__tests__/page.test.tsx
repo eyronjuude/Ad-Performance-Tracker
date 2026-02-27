@@ -73,19 +73,19 @@ describe("Home page (dashboard)", () => {
     expect(screen.getByText("P1")).toBeInTheDocument();
   });
 
-  it("renders View Ads links only when section is expanded", async () => {
+  it("renders View Phase Ads links only when section is expanded", async () => {
     const user = userEvent.setup();
     renderWithProvider(<Home />);
 
     const hmButton = await screen.findByRole("button", {
       name: "Employee HM",
     });
-    expect(screen.queryAllByRole("link", { name: /View Ads/i })).toHaveLength(
-      0
-    );
+    expect(
+      screen.queryAllByRole("link", { name: /View Phase Ads/i })
+    ).toHaveLength(0);
     await user.click(hmButton);
 
-    const links = screen.getAllByRole("link", { name: /View Ads/i });
+    const links = screen.getAllByRole("link", { name: /View Phase Ads/i });
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute("href", "/ads?employee_acronym=HM");
   });

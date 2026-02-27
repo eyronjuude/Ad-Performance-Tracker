@@ -11,6 +11,7 @@ import {
 } from "@/lib/api";
 import { useSettings } from "@/components/SettingsProvider";
 import { AdsTable } from "@/components/AdsTable";
+import { AdsTableSkeleton } from "@/components/AdsTableSkeleton";
 
 function formatSpendAud(value: number): string {
   return new Intl.NumberFormat("en-AU", {
@@ -215,33 +216,7 @@ function AdsPageContent() {
         )}
 
         {/* Loading skeleton */}
-        {isLoading && (
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-800/50">
-              <div className="flex gap-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-4 flex-1 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700"
-                  />
-                ))}
-              </div>
-            </div>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex gap-4 border-b border-zinc-100 px-4 py-3 last:border-b-0 dark:border-zinc-800"
-              >
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <div
-                    key={j}
-                    className="h-4 flex-1 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800"
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
+        {isLoading && <AdsTableSkeleton />}
 
         {/* Ads table */}
         {!isLoading && !error && <AdsTable rows={rows} />}

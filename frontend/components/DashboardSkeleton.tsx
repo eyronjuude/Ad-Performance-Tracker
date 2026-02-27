@@ -20,28 +20,58 @@ export function DashboardSkeleton() {
           <div className="space-y-8">
             {[1, 2, 3].map((i) => (
               <div key={i}>
-                <Skeleton className="mb-4 h-6 w-32" />
+                {/* Chevron + employee name row (expandable header) */}
+                <Skeleton className="mb-4 h-6 w-40" />
                 <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50">
-                        {[1, 2, 3, 4, 5, 6].map((col) => (
-                          <th key={col} className="px-4 py-3">
-                            <Skeleton className="h-4 w-16" />
-                          </th>
-                        ))}
+                        <th className="px-4 py-3 text-left">
+                          <Skeleton className="h-4 w-12" />
+                        </th>
+                        <th className="px-4 py-3 text-right">
+                          <Skeleton className="inline-block h-4 w-24" />
+                        </th>
+                        <th className="px-4 py-3 text-right">
+                          <Skeleton className="inline-block h-4 w-12" />
+                        </th>
+                        <th className="px-4 py-3 text-center">
+                          <Skeleton className="mx-auto h-4 w-24" />
+                        </th>
+                        <th className="px-4 py-3 text-center">
+                          <Skeleton className="mx-auto h-4 w-24" />
+                        </th>
+                        <th className="px-4 py-3 text-left">
+                          <Skeleton className="h-4 w-24" />
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                        {[1, 2, 3, 4, 5, 6].map((col) => (
-                          <td key={col} className="px-4 py-3">
-                            <Skeleton
-                              className={`h-4 ${col <= 2 ? "w-20" : col <= 4 ? "w-8" : "w-16"}`}
-                            />
+                      {[1, 2, 3].map((row) => (
+                        <tr
+                          key={row}
+                          className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800"
+                        >
+                          <td className="px-4 py-3">
+                            <Skeleton className="h-4 w-20" />
                           </td>
-                        ))}
-                      </tr>
+                          <td className="px-4 py-3 text-right">
+                            <Skeleton className="inline-block h-4 w-16" />
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Skeleton className="inline-block h-4 w-10" />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <Skeleton className="mx-auto h-3 w-3 rounded-full" />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <Skeleton className="mx-auto h-3 w-3 rounded-full" />
+                          </td>
+                          <td className="px-4 py-3">
+                            <Skeleton className="h-8 w-24 rounded-md" />
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -57,23 +87,67 @@ export function DashboardSkeleton() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50">
-                  {[1, 2, 3, 4, 5, 6, 7].map((col) => (
-                    <th key={col} className="px-4 py-3">
-                      <Skeleton className="h-4 w-16" />
-                    </th>
-                  ))}
+                  <th className="px-4 py-3 text-left">
+                    <Skeleton className="h-4 w-20" />
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <Skeleton className="h-4 w-20" />
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <Skeleton className="h-4 w-20" />
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    <Skeleton className="inline-block h-4 w-24" />
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    <Skeleton className="inline-block h-4 w-12" />
+                  </th>
+                  <th className="px-4 py-3 text-center">
+                    <Skeleton className="mx-auto h-4 w-24" />
+                  </th>
+                  <th className="px-4 py-3 text-center">
+                    <Skeleton className="mx-auto h-4 w-24" />
+                  </th>
+                  <th className="px-4 py-3 text-left">
+                    <Skeleton className="h-4 w-16" />
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                  {[1, 2, 3, 4, 5, 6, 7].map((col) => (
-                    <td key={col} className="px-4 py-3">
-                      <Skeleton
-                        className={`h-4 ${col <= 3 ? "w-20" : col <= 5 ? "w-8" : "w-16"}`}
-                      />
+                {[1, 2, 3].map((row) => (
+                  <tr
+                    key={row}
+                    className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-12" />
+                      </div>
                     </td>
-                  ))}
-                </tr>
+                    <td className="px-4 py-3">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Skeleton className="h-4 w-20" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Skeleton className="inline-block h-4 w-16" />
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Skeleton className="inline-block h-4 w-10" />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Skeleton className="mx-auto h-3 w-3 rounded-full" />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Skeleton className="mx-auto h-3 w-3 rounded-full" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Skeleton className="h-8 w-24 rounded-md" />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

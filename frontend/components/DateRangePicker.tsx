@@ -57,23 +57,55 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
   const dateRange = toDateRange(startDate, endDate);
+  const isSelectingEnd = React.useRef(false);
 
-  const handleSelect = React.useCallback(
-    (range: DateRange | undefined) => {
-      if (!range?.from) {
-        onRangeChange(null, null);
-        return;
-      }
-      const fromStr = toYYYYMMDD(range.from);
-      if (!range.to) {
-        onRangeChange(fromStr, null);
-        return;
-      }
-      const toStr = toYYYYMMDD(range.to);
-      onRangeChange(fromStr, toStr);
-    },
-    [onRangeChange]
+  // Temp range: working state while popover is open; commits on Apply
+  const [tempRange, setTempRange] = React.useState<DateRange | undefined>(
+    () => dateRange
   );
+
+  // Sync tempRange when popover opens or committed range changes
+  React.useEffect(() => {
+    if (open) {
+      setTempRange(dateRange);
+      isSelectingEnd.current = false;
+    }
+  }, [open, startDate, endDate]);
+
+  const handleDayClick = React.useCallback(
+    (day: Date) => {
+      if (!isSelectingEnd.current || !tempRange?.from) {
+        setTempRange({ from: day, to: undefined });
+        isSelectingEnd.current = true;
+      } else {
+        const from = tempRange.from;
+        if (day < from) {
+          setTempRange({ from: day, to: from });
+        } else {
+          setTempRange({ from, to: day });
+        }
+        isSelectingEnd.current = false;
+      }
+    },
+    [tempRange?.from]
+  );
+
+  const handleApply = React.useCallback(() => {
+    if (tempRange?.from && tempRange?.to) {
+      onRangeChange(toYYYYMMDD(tempRange.from), toYYYYMMDD(tempRange.to));
+    } else {
+      // Incomplete or cleared: commit empty range
+      onRangeChange(null, null);
+    }
+    isSelectingEnd.current = false;
+    setOpen(false);
+  }, [tempRange, onRangeChange]);
+
+  const handleCancel = React.useCallback(() => {
+    setTempRange(dateRange);
+    isSelectingEnd.current = false;
+    setOpen(false);
+  }, [dateRange]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -105,13 +137,35 @@ export function DateRangePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="range"
-          defaultMonth={dateRange?.from}
-          selected={dateRange}
-          onSelect={handleSelect}
-          numberOfMonths={2}
-        />
+        <div className="bg-background flex flex-col rounded-md">
+          <Calendar
+            mode="range"
+            defaultMonth={tempRange?.from ?? dateRange?.from}
+            selected={tempRange}
+            onSelect={() => {}}
+            onDayClick={handleDayClick}
+            numberOfMonths={2}
+            captionLayout="dropdown"
+            startMonth={new Date(new Date().getFullYear() - 2, 0, 1)}
+            endMonth={new Date()}
+            reverseYears
+            disabled={{ after: new Date() }}
+            showOutsideDays={false}
+            className="bg-background!"
+          />
+          <div className="flex justify-end gap-2 border-t p-3">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleApply}
+              disabled={!tempRange?.from || !tempRange?.to}
+            >
+              Apply
+            </Button>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

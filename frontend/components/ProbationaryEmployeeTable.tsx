@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { CroasThreshold, Employee, SpendThreshold } from "@/lib/config";
+import { Skeleton } from "./Skeleton";
 import {
   getCroasEvaluationColor,
   getSpendEvaluationColor,
@@ -135,7 +136,7 @@ export function ProbationaryEmployeeTable({
                       Missing dates
                     </span>
                   ) : isLoading ? (
-                    "…"
+                    <Skeleton className="inline-block h-4 w-16" />
                   ) : error ? (
                     "—"
                   ) : aggregates != null ? (
@@ -145,19 +146,23 @@ export function ProbationaryEmployeeTable({
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-zinc-900 tabular-nums dark:text-zinc-50">
-                  {missingDates
-                    ? "—"
-                    : isLoading
-                      ? "…"
-                      : error
-                        ? "—"
-                        : aggregates != null
-                          ? formatCroas(aggregates.blendedCroas)
-                          : "—"}
+                  {missingDates ? (
+                    "—"
+                  ) : isLoading ? (
+                    <Skeleton className="inline-block h-4 w-10" />
+                  ) : error ? (
+                    "—"
+                  ) : aggregates != null ? (
+                    formatCroas(aggregates.blendedCroas)
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {missingDates || isLoading || error ? (
+                  {missingDates || error ? (
                     <span className="inline-block h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  ) : isLoading ? (
+                    <Skeleton className="mx-auto h-3 w-3 rounded-full" />
                   ) : (
                     <span
                       className={`inline-block h-3 w-3 rounded-full ${DOT_COLORS[spendColor] ?? DOT_COLORS.gray}`}
@@ -167,8 +172,10 @@ export function ProbationaryEmployeeTable({
                   )}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {missingDates || isLoading || error ? (
+                  {missingDates || error ? (
                     <span className="inline-block h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  ) : isLoading ? (
+                    <Skeleton className="mx-auto h-3 w-3 rounded-full" />
                   ) : (
                     <span
                       className={`inline-block h-3 w-3 rounded-full ${DOT_COLORS[croasColor] ?? DOT_COLORS.gray}`}
@@ -182,7 +189,7 @@ export function ProbationaryEmployeeTable({
                     href={adsHref}
                     className="inline-flex items-center rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                   >
-                    View Ads
+                    View Phase Ads
                   </Link>
                 </td>
               </tr>
