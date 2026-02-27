@@ -7,7 +7,7 @@ describe("DatePicker", () => {
   it("renders placeholder when no date is set", () => {
     const onChange = vi.fn();
     render(<DatePicker value={null} onChange={onChange} />);
-    expect(screen.getByText(/dd MMM yyyy/i)).toBeInTheDocument();
+    expect(screen.getByText(/Select date/i)).toBeInTheDocument();
   });
 
   it("renders custom placeholder when provided", () => {
