@@ -71,4 +71,52 @@ describe("DateRangePicker", () => {
     const calendar = popover?.querySelector("[data-slot='calendar']");
     expect(calendar).toBeInTheDocument();
   });
+
+  it("shows Apply and Cancel buttons in popover", async () => {
+    const user = userEvent.setup();
+    render(
+      <DateRangePicker
+        startDate={null}
+        endDate={null}
+        onRangeChange={() => {}}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", { name: /Pick a date range/i })
+    );
+    expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Apply/i })).toBeInTheDocument();
+  });
+
+  it("disables Apply when no valid date range is selected", async () => {
+    const user = userEvent.setup();
+    render(
+      <DateRangePicker
+        startDate={null}
+        endDate={null}
+        onRangeChange={() => {}}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", { name: /Pick a date range/i })
+    );
+    expect(screen.getByRole("button", { name: /Apply/i })).toBeDisabled();
+  });
+
+  it("commits range on Apply and closes popover", async () => {
+    const user = userEvent.setup();
+    const onRangeChange = vi.fn();
+    render(
+      <DateRangePicker
+        startDate="2025-01-15"
+        endDate="2025-01-20"
+        onRangeChange={onRangeChange}
+      />
+    );
+    await user.click(screen.getByText(/Jan 15, 2025/));
+    await user.click(screen.getByRole("button", { name: /Apply/i }));
+    expect(onRangeChange).toHaveBeenCalledWith("2025-01-15", "2025-01-20");
+    const popover = document.querySelector("[data-slot='popover-content']");
+    expect(popover).not.toBeInTheDocument();
+  });
 });
