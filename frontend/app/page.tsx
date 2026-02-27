@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { EmployeeTable } from "@/components/EmployeeTable";
 import { ProbationaryEmployeeTable } from "@/components/ProbationaryEmployeeTable";
 import { useSettings } from "@/components/SettingsProvider";
@@ -17,7 +18,7 @@ interface EmployeeState {
 }
 
 export default function Home() {
-  const { settings } = useSettings();
+  const { settings, isLoading } = useSettings();
 
   const allEmployees = useMemo(
     () => settings.employees.filter((e) => e.acronym.trim() !== ""),
@@ -192,6 +193,10 @@ export default function Home() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [probationaryKey]);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">

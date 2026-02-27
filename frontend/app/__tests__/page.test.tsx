@@ -1,33 +1,44 @@
 import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsProvider } from "@/components/SettingsProvider";
 import Home from "@/app/page";
+import { fetchSettings } from "@/lib/settings-api";
+import { getDefaultSettings } from "@/lib/settings";
+
+vi.mock("@/lib/settings-api", () => ({
+  fetchSettings: vi.fn(),
+  saveSettingsApi: vi.fn().mockResolvedValue({}),
+}));
 
 function renderWithProvider(ui: ReactElement) {
   return render(<SettingsProvider>{ui}</SettingsProvider>);
 }
 
+beforeEach(() => {
+  vi.mocked(fetchSettings).mockResolvedValue(getDefaultSettings());
+});
+
 describe("Home page (dashboard)", () => {
-  it("renders the Ad Performance Dashboard heading", () => {
+  it("renders the Ad Performance Dashboard heading", async () => {
     renderWithProvider(<Home />);
     expect(
-      screen.getByRole("heading", { name: /Ad Performance Dashboard/i })
+      await screen.findByRole("heading", { name: /Ad Performance Dashboard/i })
     ).toBeInTheDocument();
   });
 
-  it("renders Tenured Employees section heading when tenured employees exist", () => {
+  it("renders Tenured Employees section heading when tenured employees exist", async () => {
     renderWithProvider(<Home />);
     expect(
-      screen.getByRole("heading", { name: /Tenured Employees/i })
+      await screen.findByRole("heading", { name: /Tenured Employees/i })
     ).toBeInTheDocument();
   });
 
-  it("renders employee names as headings, collapsed by default", () => {
+  it("renders employee names as headings, collapsed by default", async () => {
     renderWithProvider(<Home />);
     expect(
-      screen.getByRole("heading", { name: "Employee HM" })
+      await screen.findByRole("heading", { name: "Employee HM" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Employee ABC" })
@@ -50,7 +61,9 @@ describe("Home page (dashboard)", () => {
     const user = userEvent.setup();
     renderWithProvider(<Home />);
 
-    const hmButton = screen.getByRole("button", { name: "Employee HM" });
+    const hmButton = await screen.findByRole("button", {
+      name: "Employee HM",
+    });
     expect(hmButton).toHaveAttribute("aria-expanded", "false");
 
     await user.click(hmButton);
@@ -64,11 +77,12 @@ describe("Home page (dashboard)", () => {
     const user = userEvent.setup();
     renderWithProvider(<Home />);
 
+    const hmButton = await screen.findByRole("button", {
+      name: "Employee HM",
+    });
     expect(screen.queryAllByRole("link", { name: /View Ads/i })).toHaveLength(
       0
     );
-
-    const hmButton = screen.getByRole("button", { name: "Employee HM" });
     await user.click(hmButton);
 
     const links = screen.getAllByRole("link", { name: /View Ads/i });
@@ -76,10 +90,22 @@ describe("Home page (dashboard)", () => {
     expect(links[0]).toHaveAttribute("href", "/ads?employee_acronym=HM");
   });
 
-  it("does not render Probationary Employees section when none exist", () => {
+  it("does not render Probationary Employees section when none exist", async () => {
     renderWithProvider(<Home />);
+    await screen.findByRole("heading", { name: /Ad Performance Dashboard/i });
     expect(
       screen.queryByRole("heading", { name: /Probationary Employees/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows skeleton while settings are loading", () => {
+    vi.mocked(fetchSettings).mockReturnValue(new Promise(() => {}));
+
+    renderWithProvider(<Home />);
+
+    expect(screen.getByTestId("dashboard-skeleton")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /Ad Performance Dashboard/i })
     ).not.toBeInTheDocument();
   });
 });
