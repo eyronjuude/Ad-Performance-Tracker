@@ -1,5 +1,6 @@
 "use client";
 
+import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { useSettings } from "@/components/SettingsProvider";
 import type {
   Employee,
@@ -335,7 +336,11 @@ function CroasEvaluationSection() {
 }
 
 export default function SettingsPage() {
-  const { error } = useSettings();
+  const { error, isLoading } = useSettings();
+
+  if (isLoading) {
+    return <SettingsSkeleton />;
+  }
 
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-8">

@@ -18,6 +18,10 @@ bun dev
 - **/dashboard** -- Redirects to /
 - **/ads** -- Ads detail page (P1 filter for tenured, date-range filter for probationary)
 
+## Loading States
+
+The dashboard and settings pages show skeleton loaders while settings are fetched from the API, avoiding harsh flashes of default content before the real data loads.
+
 ## Sidebar
 
 The app includes a sidebar for navigation between Dashboard and Settings. Settings are stored in the backend (Postgres/Neon or SQLite) and shared across all users. Ensure the backend is running and `NEXT_PUBLIC_API_URL` points to it.
