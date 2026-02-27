@@ -11,7 +11,7 @@ Before implementing a solution manually, check whether existing **modules** (pac
 
 ## Guidelines
 
-- **Search first**: Before writing custom code for common problems (validation, date handling, HTTP clients, state management, crypto utilities, etc.), search for established modules.
+- **Search first**: Before writing custom code for common problems (validation, date handling, HTTP clients, state management, UI components like date pickers, crypto utilities, etc.), search for established modules.
 - **Vet modules**: Prefer modules with:
   - Large community support (GitHub stars, downloads, active maintenance)
   - Good documentation and positive community reception
@@ -39,6 +39,15 @@ import obscureValidation from 'obscure-validation-lib';
 // ✅ GOOD - Use zod, yup, or joi for validation; implement manually if none fit
 import { z } from 'zod';
 const schema = z.object({ email: z.string().email() });
+```
+
+```javascript
+// ❌ BAD - Native HTML for date picker when project has shadcn
+<input type="date" value={date} onChange={...} />
+
+// ✅ GOOD - Use project's component library (shadcn date picker/range)
+import { DateRangePicker } from '@/components/DateRangePicker';
+<DateRangePicker startDate={...} endDate={...} onRangeChange={...} />
 ```
 
 ## Checklist
