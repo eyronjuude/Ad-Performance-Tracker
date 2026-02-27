@@ -27,9 +27,10 @@ COL_REVENUE = "placed_order_total_revenue_sum_direct_session"
 def _get_date_column() -> str:
     """Return the BigQuery column used for date-range filtering.
 
-    Configurable via BIGQUERY_DATE_COLUMN env var; defaults to ``day``.
+    Configurable via BIGQUERY_DATE_COLUMN env var; defaults to ``date``
+    (Converge BigQuery schema).
     """
-    return os.environ.get("BIGQUERY_DATE_COLUMN", "day")
+    return os.environ.get("BIGQUERY_DATE_COLUMN", "date")
 
 
 def _get_bigquery_credentials():

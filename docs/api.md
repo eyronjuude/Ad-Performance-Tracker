@@ -91,7 +91,7 @@ Rows are ordered by `spend` descending.
 - `502 Bad Gateway` — BigQuery request failed.
 - `503 Service Unavailable` — BigQuery not configured or client creation failed.
 
-**Table schema:** The BigQuery table must include columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session`. For date-range filtering, the table must also have the column configured via `BIGQUERY_DATE_COLUMN` (default: `day`). cROAS is computed as `placed_order_total_revenue_sum_direct_session / spend_sum`.
+**Table schema:** The BigQuery table must include columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session`. For date-range filtering, the table must also have the column configured via `BIGQUERY_DATE_COLUMN` (default: `date`). cROAS is computed as `placed_order_total_revenue_sum_direct_session / spend_sum`.
 
 ---
 
