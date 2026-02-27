@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const DISPLAY_FORMAT = "dd MMM yyyy";
-const PLACEHOLDER = "dd MMM yyyy";
+const PLACEHOLDER = "Select date";
 
 export interface DatePickerProps {
   /** Date value (YYYY-MM-DD) */
@@ -22,6 +22,10 @@ export interface DatePickerProps {
   onChange: (value: string | null) => void;
   /** Label shown beside the input (e.g. "Start date", "Review date") */
   label?: string;
+  /** Disable dates before this (YYYY-MM-DD). Use when the other bound is set. */
+  minDate?: string | null;
+  /** Disable dates after this (YYYY-MM-DD). Use when the other bound is set. */
+  maxDate?: string | null;
   disabled?: boolean;
   placeholder?: string;
   id?: string;
@@ -43,6 +47,8 @@ export function DatePicker({
   value,
   onChange,
   label,
+  minDate,
+  maxDate,
   disabled = false,
   placeholder = PLACEHOLDER,
   id,
@@ -74,6 +80,14 @@ export function DatePicker({
     setTempDate(date);
     setOpen(false);
   }, [date]);
+
+  const today = React.useMemo(() => new Date(), []);
+  const disabledMatcher = React.useMemo(() => {
+    const before = minDate ? toDate(minDate) : undefined;
+    const maxDateObj = maxDate ? toDate(maxDate) : undefined;
+    const after = maxDateObj && maxDateObj < today ? maxDateObj : today;
+    return { before, after };
+  }, [minDate, maxDate]);
 
   const triggerContent = date ? (
     format(date, DISPLAY_FORMAT)
@@ -117,7 +131,7 @@ export function DatePicker({
               startMonth={new Date(new Date().getFullYear() - 2, 0, 1)}
               endMonth={new Date()}
               reverseYears
-              disabled={{ after: new Date() }}
+              disabled={disabledMatcher}
               showOutsideDays={false}
               className="bg-background!"
             />

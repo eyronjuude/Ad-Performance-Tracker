@@ -121,8 +121,9 @@ function EmployeeMappingSection() {
                     label="Start date"
                     value={emp.startDate}
                     onChange={(startDate) => updateEmployee(i, { startDate })}
+                    maxDate={emp.reviewDate}
                     disabled={datesDisabled}
-                    placeholder={isTenured ? "Not required" : "dd MMM yyyy"}
+                    placeholder={isTenured ? "Not required" : "Select date"}
                     id={`employee-${i}-start-date`}
                     aria-label="Start date"
                   />
@@ -130,8 +131,9 @@ function EmployeeMappingSection() {
                     label="Review date"
                     value={emp.reviewDate}
                     onChange={(reviewDate) => updateEmployee(i, { reviewDate })}
+                    minDate={emp.startDate}
                     disabled={datesDisabled}
-                    placeholder={isTenured ? "Not required" : "dd MMM yyyy"}
+                    placeholder={isTenured ? "Not required" : "Select date"}
                     id={`employee-${i}-review-date`}
                     aria-label="Review date"
                   />
@@ -164,38 +166,120 @@ function EmployeeMappingSection() {
   );
 }
 
+/** Format number as $X,XXX with thousand separators. */
+function formatCurrency(value: number | null | undefined): string {
+  if (value == null) return "";
+  return new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+/** Parse currency string to number; empty returns null. */
+function parseCurrency(input: string): number | null {
+  const digits = input.replace(/[^\d]/g, "");
+  if (digits === "") return null;
+  return Number.parseInt(digits, 10);
+}
+
 function ThresholdRow({
   threshold,
   onUpdate,
   colorLabel,
+  format = "number",
 }: {
   threshold: SpendThreshold | CroasThreshold;
   onUpdate: (updates: Partial<SpendThreshold | CroasThreshold>) => void;
   colorLabel: string;
+  format?: "number" | "currency";
 }) {
+  const isCurrency = format === "currency";
+
+  const minDisplay =
+    isCurrency && typeof threshold.min === "number"
+      ? formatCurrency(threshold.min)
+      : threshold.min != null && threshold.min !== ""
+        ? String(threshold.min)
+        : "";
+
+  const maxDisplay =
+    isCurrency && threshold.max != null
+      ? formatCurrency(threshold.max)
+      : threshold.max != null && threshold.max !== ""
+        ? String(threshold.max)
+        : "";
+
+  const handleMinChange = (raw: string) => {
+    if (isCurrency) {
+      const n = parseCurrency(raw);
+      onUpdate({ min: n ?? 0 });
+    } else {
+      const parsed = raw === "" ? 0 : Number(raw);
+      onUpdate({ min: Number.isNaN(parsed) ? 0 : parsed });
+    }
+  };
+
+  const handleMaxChange = (raw: string) => {
+    if (isCurrency) {
+      const n = parseCurrency(raw);
+      onUpdate({ max: n });
+    } else {
+      const parsed = raw === "" ? null : Number(raw);
+      onUpdate({
+        max: parsed === null || Number.isNaN(parsed) ? null : parsed,
+      });
+    }
+  };
+
+  const minInput = isCurrency ? (
+    <input
+      type="text"
+      inputMode="numeric"
+      placeholder="Min"
+      value={minDisplay}
+      onChange={(e) => handleMinChange(e.target.value)}
+      className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+      aria-label="Minimum value"
+    />
+  ) : (
+    <input
+      type="number"
+      placeholder="Min"
+      value={threshold.min != null ? threshold.min : ""}
+      onChange={(e) => handleMinChange(e.target.value)}
+      className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+      aria-label="Minimum value"
+    />
+  );
+
+  const maxInput = isCurrency ? (
+    <input
+      type="text"
+      inputMode="numeric"
+      placeholder="Max (empty = no cap)"
+      value={maxDisplay}
+      onChange={(e) => handleMaxChange(e.target.value)}
+      className="w-32 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+      aria-label="Maximum value (empty for no cap)"
+    />
+  ) : (
+    <input
+      type="number"
+      placeholder="Max (empty = no cap)"
+      value={threshold.max != null ? threshold.max : ""}
+      onChange={(e) => handleMaxChange(e.target.value)}
+      className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+      aria-label="Maximum value (empty for no cap)"
+    />
+  );
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <input
-        type="number"
-        placeholder="Min"
-        value={threshold.min || ""}
-        onChange={(e) =>
-          onUpdate({ min: e.target.value ? Number(e.target.value) : 0 })
-        }
-        className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-      />
+      {minInput}
       <span className="text-zinc-500">–</span>
-      <input
-        type="number"
-        placeholder="Max (empty = no cap)"
-        value={threshold.max ?? ""}
-        onChange={(e) =>
-          onUpdate({
-            max: e.target.value ? Number(e.target.value) : null,
-          })
-        }
-        className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-      />
+      {maxInput}
       <span className="text-sm text-zinc-500">→ {colorLabel}</span>
     </div>
   );
@@ -268,6 +352,7 @@ function SpendEvaluationSection() {
               threshold={t}
               onUpdate={(u) => updateSpendThreshold(i, u)}
               colorLabel={t.color}
+              format="currency"
             />
           </div>
         ))}
