@@ -1,12 +1,14 @@
-# Pre-commit jobs align with Cursor hooks: style (prettier/ruff) + security (no secret env files).
+# Pre-commit jobs mirror CI (.github/workflows/ci.yml): lint, format, typecheck, test, build, ruff.
+# Fix jobs (prettier, ruff) run first; verify jobs match CI exactly.
 # Cursor beforeShellExecution (bun vs npm, venv) has no pre-commit analogue — we run fixed commands (bunx, run_ruff.sh).
 pre-commit:
-  parallel: true
+  parallel: false  # Run fix then verify in order (CI runs sequentially)
   jobs:
     # Cursor: beforeReadFile (security) — no-exposed-secrets
     - name: no-secret-files
       run: sh scripts/check_no_secret_files.sh
 
+    # Fix staged files (before CI-style verify)
     - name: prettier
       root: "frontend/"
       glob: "frontend/**/*.{ts,tsx,js,jsx,mjs,json,css,md}"
@@ -22,3 +24,28 @@ pre-commit:
       glob: "backend/**/*.py"
       run: sh scripts/run_ruff.sh check --fix {staged_files}
       stage_fixed: true
+
+    # Mirror CI: frontend lint, format check, typecheck, test, build
+    - name: format-check
+      root: "frontend/"
+      run: bun run format:check
+
+    - name: lint
+      root: "frontend/"
+      run: bun run lint
+
+    - name: typecheck
+      root: "frontend/"
+      run: bun run tsc --noEmit
+
+    - name: test
+      root: "frontend/"
+      run: bun run test
+
+    - name: build
+      root: "frontend/"
+      run: bun run build
+
+    # Mirror CI: backend ruff format check + ruff check
+    - name: ruff-backend
+      run: sh scripts/run_ruff.sh format --check backend/ && sh scripts/run_ruff.sh check backend/
