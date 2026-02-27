@@ -1,0 +1,35 @@
+---
+description: Prefer linear Git history; use rebase and fast-forward where possible
+alwaysApply: true
+---
+
+# Ensure Linear Git History
+
+Whenever performing Git operations (pull, merge, push, integrate branches), prefer strategies that keep history linear.
+
+## Principles
+
+- **Linear history**: One commit follows another in a straight line—no unnecessary merge commits
+- **Fast-forward when possible**: `git merge --ff-only` or rebase-then-merge
+- **Rebase over merge**: When updating a branch from upstream, use `git pull --rebase` or `git fetch` + `git rebase`
+
+## Guidelines
+
+| Situation | Prefer | Avoid |
+|-----------|--------|-------|
+| Pulling updates | `git pull --rebase` | `git pull` (creates merge commit) |
+| Merging feature into main | Rebase feature onto main, then ff-merge | Merge commit unless necessary |
+| Fixing mistakes | `git commit --fixup` + `rebase -i --autosquash` | Multiple tiny fix commits left in history |
+| Pushing | Rebase onto `origin/<branch>`, then push | Force-push to shared branches without agreement |
+
+## When Merge Commits Are Acceptable
+
+- Merging a release branch back to main (if team uses that flow)
+- Explicitly requested by the team
+- Resolving a rebase is too risky (e.g. many conflicts, large shared branch)
+
+## Checklist
+
+1. Before push: `git fetch` and rebase onto `origin/<branch>`
+2. Pull: Use `--rebase` unless merge is required
+3. Never force-push to shared/main branches without team approval
