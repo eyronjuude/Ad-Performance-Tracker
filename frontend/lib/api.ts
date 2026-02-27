@@ -57,6 +57,57 @@ export async function fetchPerformanceSummary(
   };
 }
 
+/** Fetch summary for a date range (no P1 filter). Used for probationary employees. */
+export async function fetchPerformanceSummaryByDate(
+  employeeAcronym: string,
+  startDate: string,
+  endDate: string
+): Promise<EmployeeAggregates> {
+  const url = new URL("/api/bigquery/performance/summary", API_BASE);
+  url.searchParams.set("employee_acronym", employeeAcronym);
+  url.searchParams.set("start_date", startDate);
+  url.searchParams.set("end_date", endDate);
+  url.searchParams.set("p1_only", "false");
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      detail.detail ?? `API error: ${res.status} ${res.statusText}`
+    );
+  }
+  const data = (await res.json()) as {
+    total_spend: number;
+    blended_croas: number | null;
+    row_count: number;
+  };
+  return {
+    totalSpend: data.total_spend,
+    blendedCroas: data.blended_croas ?? 0,
+    rowCount: data.row_count,
+  };
+}
+
+/** Fetch performance rows for a date range (no P1 filter). Used for probationary employees. */
+export async function fetchPerformanceByDate(
+  employeeAcronym: string,
+  startDate: string,
+  endDate: string
+): Promise<PerformanceRow[]> {
+  const url = new URL("/api/bigquery/performance", API_BASE);
+  url.searchParams.set("employee_acronym", employeeAcronym);
+  url.searchParams.set("start_date", startDate);
+  url.searchParams.set("end_date", endDate);
+  url.searchParams.set("p1_only", "false");
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(
+      detail.detail ?? `API error: ${res.status} ${res.statusText}`
+    );
+  }
+  return res.json() as Promise<PerformanceRow[]>;
+}
+
 /** Aggregate performance rows into totals. Blended CROAS = sum(spend*croas)/sum(spend). */
 export function aggregatePerformance(
   rows: PerformanceRow[]

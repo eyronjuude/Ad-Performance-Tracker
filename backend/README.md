@@ -36,8 +36,9 @@ Quick list:
 - `GET /` – Root message
 - `GET /health` – Health check
 - `GET /api/bigquery/sample` – Up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
-- `GET /api/bigquery/performance?employee_acronym=<acronym>` – P1 ad performance for the given employee acronym, deduplicated by ad name and adset name (spend summed, cROAS spend-weighted average). Returns `ad_name`, `adset_name`, `spend`, `croas`. P1 = substring in `ad_name`; acronym = word in `adset_name` (surrounded by non-letters only). Requires BigQuery env vars and table columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session` (cROAS = revenue / spend).
-- `GET /api/settings` – App settings (employees, evaluation thresholds, periods). Stored in Postgres (Neon) or SQLite; shared across users.
+- `GET /api/bigquery/performance?employee_acronym=<acronym>` – Ad performance by employee acronym, deduplicated by ad name and adset name. Optional params: `p1_only` (default true), `start_date`, `end_date` for date-range filtering.
+- `GET /api/bigquery/performance/summary?employee_acronym=<acronym>` – Aggregated single-row summary. Same optional params as above.
+- `GET /api/settings` – App settings (employees with status/dates, evaluation thresholds, periods). Stored in Postgres (Neon) or SQLite; shared across users.
 - `PUT /api/settings` – Update app settings. Request body: same shape as GET response.
 
 ## Environment variables
@@ -47,6 +48,7 @@ Quick list:
 | `GCP_PROJECT` | GCP project ID for BigQuery |
 | `BIGQUERY_DATASET` | BigQuery dataset name |
 | `BIGQUERY_TABLE` | BigQuery table name |
+| `BIGQUERY_DATE_COLUMN` | (Optional) Column used for date-range filtering. Default: `day` |
 | `GOOGLE_CREDENTIALS_JSON` | (Optional) Service account JSON as string; use for Railway/serverless when no file path is available |
 | `GOOGLE_APPLICATION_CREDENTIALS` | (Optional) Path to service account JSON file; used when GOOGLE_CREDENTIALS_JSON is not set |
 | `DATABASE_URL` | (Optional) Postgres connection string (e.g. from Vercel/Neon). When set, used for settings. |

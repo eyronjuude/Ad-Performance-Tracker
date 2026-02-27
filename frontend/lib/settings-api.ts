@@ -3,7 +3,7 @@
  */
 
 import type { Settings } from "./settings";
-import type { CroasThreshold, SpendThreshold } from "./config";
+import type { CroasThreshold, EmployeeStatus, SpendThreshold } from "./config";
 
 const API_BASE =
   typeof process !== "undefined"
@@ -52,13 +52,28 @@ function normalizeThresholds<T extends SpendThreshold | CroasThreshold>(
   return [byColor.green, byColor.yellow, byColor.red] as T[];
 }
 
+function normalizeEmployeeStatus(value: unknown): EmployeeStatus {
+  return value === "probationary" ? "probationary" : "tenured";
+}
+
 /** Map backend camelCase to our Settings shape. Always exactly 3 thresholds (Red, Yellow, Green). */
 function normalizeSettings(raw: Record<string, unknown>): Settings {
   return {
     employees: Array.isArray(raw.employees)
-      ? (raw.employees as { acronym: string; name: string }[]).map((e) => ({
+      ? (
+          raw.employees as {
+            acronym?: string;
+            name?: string;
+            status?: unknown;
+            startDate?: unknown;
+            reviewDate?: unknown;
+          }[]
+        ).map((e) => ({
           acronym: String(e?.acronym ?? ""),
           name: String(e?.name ?? ""),
+          status: normalizeEmployeeStatus(e?.status),
+          startDate: typeof e?.startDate === "string" ? e.startDate : null,
+          reviewDate: typeof e?.reviewDate === "string" ? e.reviewDate : null,
         }))
       : [],
     spendEvaluationKey: normalizeThresholds(

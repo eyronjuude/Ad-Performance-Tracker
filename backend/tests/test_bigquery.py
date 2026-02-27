@@ -300,6 +300,69 @@ def test_build_performance_summary_query_uses_cte_aggregation() -> None:
     assert "REGEXP_CONTAINS" in query
 
 
+def test_build_performance_query_without_p1_and_with_dates() -> None:
+    """Query without P1 filter and with date range includes BETWEEN, no p1."""
+    full_table = "`p`.`d`.`t`"
+    query = _build_performance_query(full_table, p1_only=False, has_date_filter=True)
+    assert "%p1%" not in query
+    assert "BETWEEN" in query
+    assert "@start_date" in query
+    assert "@end_date" in query
+    assert "REGEXP_CONTAINS" in query
+    assert "GROUP BY" in query
+
+
+def test_build_performance_query_without_p1_no_dates() -> None:
+    """Query without P1 and without dates omits both predicates."""
+    full_table = "`p`.`d`.`t`"
+    query = _build_performance_query(full_table, p1_only=False, has_date_filter=False)
+    assert "%p1%" not in query
+    assert "BETWEEN" not in query
+    assert "REGEXP_CONTAINS" in query
+
+
+def test_build_summary_query_without_p1_and_with_dates() -> None:
+    """Summary query without P1 and with dates includes BETWEEN."""
+    full_table = "`p`.`d`.`t`"
+    query = _build_performance_summary_query(
+        full_table, p1_only=False, has_date_filter=True
+    )
+    assert "%p1%" not in query
+    assert "BETWEEN" in query
+    assert "WITH per_ad AS" in query
+
+
+def test_get_performance_with_date_range(client: TestClient) -> None:
+    """Performance endpoint with p1_only=false and dates builds date-filtered query."""
+    mock_job = MagicMock()
+    mock_job.result.return_value = []
+    mock_bq = MagicMock()
+    mock_bq.query.return_value = mock_job
+
+    app.dependency_overrides[get_bigquery_client] = lambda: mock_bq
+    os.environ["GCP_PROJECT"] = "p"
+    os.environ["BIGQUERY_DATASET"] = "d"
+    os.environ["BIGQUERY_TABLE"] = "t"
+    try:
+        with client:
+            response = client.get(
+                "/api/bigquery/performance"
+                "?employee_acronym=NE"
+                "&p1_only=false"
+                "&start_date=2026-01-15"
+                "&end_date=2026-07-15"
+            )
+        assert response.status_code == 200
+        call_args = mock_bq.query.call_args
+        query = call_args[0][0]
+        assert "%p1%" not in query
+        assert "BETWEEN" in query
+    finally:
+        app.dependency_overrides.clear()
+        for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
+            os.environ.pop(key, None)
+
+
 def test_get_performance_returns_503_when_not_configured(client: TestClient) -> None:
     """GET /api/bigquery/performance returns 503 when BigQuery env vars are unset."""
     mock_bq = MagicMock()

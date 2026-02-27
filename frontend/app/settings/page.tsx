@@ -1,7 +1,12 @@
 "use client";
 
 import { useSettings } from "@/components/SettingsProvider";
-import type { Employee, CroasThreshold, SpendThreshold } from "@/lib/config";
+import type {
+  Employee,
+  EmployeeStatus,
+  CroasThreshold,
+  SpendThreshold,
+} from "@/lib/config";
 
 function EmployeeMappingSection() {
   const { settings, setSettings } = useSettings();
@@ -17,7 +22,16 @@ function EmployeeMappingSection() {
   const addEmployee = () => {
     setSettings((prev) => ({
       ...prev,
-      employees: [...prev.employees, { acronym: "", name: "" }],
+      employees: [
+        ...prev.employees,
+        {
+          acronym: "",
+          name: "",
+          status: "tenured" as EmployeeStatus,
+          startDate: null,
+          reviewDate: null,
+        },
+      ],
     }));
   };
 
@@ -37,35 +51,124 @@ function EmployeeMappingSection() {
         Map BigQuery acronyms to display names. Acronym is used for filtering;
         name is shown in the dashboard.
       </p>
-      <div className="space-y-3">
-        {settings.employees.map((emp, i) => (
-          <div
-            key={i}
-            className="flex flex-wrap items-center gap-2 sm:flex-nowrap"
-          >
-            <input
-              type="text"
-              placeholder="Acronym"
-              value={emp.acronym}
-              onChange={(e) => updateEmployee(i, { acronym: e.target.value })}
-              className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-            />
-            <input
-              type="text"
-              placeholder="Display name"
-              value={emp.name}
-              onChange={(e) => updateEmployee(i, { name: e.target.value })}
-              className="min-w-[120px] flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-            />
-            <button
-              type="button"
-              onClick={() => removeEmployee(i)}
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-zinc-600 dark:text-red-400 dark:hover:bg-red-900/20"
+      <div className="space-y-4">
+        {settings.employees.map((emp, i) => {
+          const isTenured = (emp.status ?? "tenured") === "tenured";
+          const datesDisabled = isTenured;
+          const hasDateWarning =
+            !isTenured &&
+            ((emp.startDate && !emp.reviewDate) ||
+              (!emp.startDate && emp.reviewDate));
+          const hasDateError =
+            !isTenured &&
+            emp.startDate &&
+            emp.reviewDate &&
+            emp.reviewDate < emp.startDate;
+
+          return (
+            <div
+              key={i}
+              className="rounded-lg border border-zinc-100 p-3 dark:border-zinc-800"
             >
-              Remove
-            </button>
-          </div>
-        ))}
+              <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+                <input
+                  type="text"
+                  placeholder="Acronym"
+                  value={emp.acronym}
+                  onChange={(e) =>
+                    updateEmployee(i, { acronym: e.target.value })
+                  }
+                  className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                />
+                <input
+                  type="text"
+                  placeholder="Display name"
+                  value={emp.name}
+                  onChange={(e) => updateEmployee(i, { name: e.target.value })}
+                  className="min-w-[120px] flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeEmployee(i)}
+                  className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-zinc-600 dark:text-red-400 dark:hover:bg-red-900/20"
+                >
+                  Remove
+                </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <select
+                  value={emp.status ?? "tenured"}
+                  onChange={(e) =>
+                    updateEmployee(i, {
+                      status: e.target.value as EmployeeStatus,
+                      ...(e.target.value === "tenured"
+                        ? { startDate: null, reviewDate: null }
+                        : {}),
+                    })
+                  }
+                  aria-label="Employee status"
+                  className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                >
+                  <option value="tenured">Tenured employee</option>
+                  <option value="probationary">Probationary employee</option>
+                </select>
+
+                <label className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                  Start date
+                  <input
+                    type="date"
+                    value={emp.startDate ?? ""}
+                    disabled={datesDisabled}
+                    onChange={(e) =>
+                      updateEmployee(i, {
+                        startDate: e.target.value || null,
+                      })
+                    }
+                    aria-label="Start date"
+                    className={`rounded-md border px-3 py-2 text-sm ${
+                      datesDisabled
+                        ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-600"
+                        : "border-zinc-300 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    }`}
+                  />
+                </label>
+
+                <label className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                  Review date
+                  <input
+                    type="date"
+                    value={emp.reviewDate ?? ""}
+                    disabled={datesDisabled}
+                    onChange={(e) =>
+                      updateEmployee(i, {
+                        reviewDate: e.target.value || null,
+                      })
+                    }
+                    aria-label="Review date"
+                    className={`rounded-md border px-3 py-2 text-sm ${
+                      datesDisabled
+                        ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-600"
+                        : "border-zinc-300 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+                    }`}
+                  />
+                </label>
+              </div>
+
+              {hasDateWarning && (
+                <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                  Both start date and review date should be set for probationary
+                  employees.
+                </p>
+              )}
+              {hasDateError && (
+                <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                  Review date must be after start date.
+                </p>
+              )}
+            </div>
+          );
+        })}
         <button
           type="button"
           onClick={addEmployee}

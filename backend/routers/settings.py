@@ -27,9 +27,27 @@ def _default_settings() -> dict[str, Any]:
     """Default settings when no stored value exists."""
     return {
         "employees": [
-            {"acronym": "HM", "name": "Employee HM"},
-            {"acronym": "ABC", "name": "Employee ABC"},
-            {"acronym": "XYZ", "name": "Employee XYZ"},
+            {
+                "acronym": "HM",
+                "name": "Employee HM",
+                "status": "tenured",
+                "startDate": None,
+                "reviewDate": None,
+            },
+            {
+                "acronym": "ABC",
+                "name": "Employee ABC",
+                "status": "tenured",
+                "startDate": None,
+                "reviewDate": None,
+            },
+            {
+                "acronym": "XYZ",
+                "name": "Employee XYZ",
+                "status": "tenured",
+                "startDate": None,
+                "reviewDate": None,
+            },
         ],
         "spendEvaluationKey": [
             {"min": 20000, "max": None, "color": "green"},
