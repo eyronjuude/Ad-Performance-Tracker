@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   fetchPerformance,
+  fetchPerformanceByDate,
   aggregatePerformance,
   type PerformanceRow,
 } from "@/lib/api";
@@ -62,6 +63,9 @@ export default function AdsPage() {
 function AdsPageContent() {
   const searchParams = useSearchParams();
   const acronym = searchParams.get("employee_acronym") ?? "";
+  const startDate = searchParams.get("start_date");
+  const endDate = searchParams.get("end_date");
+  const isProbationary = Boolean(startDate && endDate);
 
   const { settings } = useSettings();
   const employee = useMemo(
@@ -78,14 +82,17 @@ function AdsPageContent() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPerformance(acronym);
+      const data =
+        isProbationary && startDate && endDate
+          ? await fetchPerformanceByDate(acronym, startDate, endDate)
+          : await fetchPerformance(acronym);
       setRows(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load ad data");
     } finally {
       setIsLoading(false);
     }
-  }, [acronym]);
+  }, [acronym, isProbationary, startDate, endDate]);
 
   useEffect(() => {
     void loadData();
@@ -147,7 +154,9 @@ function AdsPageContent() {
             </span>
           </div>
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            P1 ad performance details from BigQuery
+            {isProbationary
+              ? `Ad performance from ${startDate} to ${endDate}`
+              : "P1 ad performance details from BigQuery"}
           </p>
         </header>
 

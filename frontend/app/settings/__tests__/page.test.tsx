@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
 import { SettingsProvider } from "@/components/SettingsProvider";
 import SettingsPage from "../page";
@@ -62,5 +63,38 @@ describe("Settings page", () => {
       /Three intervals \(Red, Yellow, Green\)/i
     );
     expect(descriptions).toHaveLength(2);
+  });
+
+  it("renders employee status selectors defaulting to Tenured", () => {
+    renderWithProvider(<SettingsPage />);
+    const selects = screen.getAllByLabelText(/Employee status/i);
+    expect(selects.length).toBeGreaterThan(0);
+    for (const select of selects) {
+      expect(select).toHaveValue("tenured");
+    }
+  });
+
+  it("date inputs are disabled for tenured employees", () => {
+    renderWithProvider(<SettingsPage />);
+    const startInputs = screen.getAllByLabelText(/Start date/i);
+    const reviewInputs = screen.getAllByLabelText(/Review date/i);
+    for (const input of startInputs) {
+      expect(input).toBeDisabled();
+    }
+    for (const input of reviewInputs) {
+      expect(input).toBeDisabled();
+    }
+  });
+
+  it("date inputs are enabled when status is changed to probationary", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    const selects = screen.getAllByLabelText(/Employee status/i);
+    await user.selectOptions(selects[0], "probationary");
+
+    const startInputs = screen.getAllByLabelText(/Start date/i);
+    const reviewInputs = screen.getAllByLabelText(/Review date/i);
+    expect(startInputs[0]).toBeEnabled();
+    expect(reviewInputs[0]).toBeEnabled();
   });
 });

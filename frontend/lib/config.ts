@@ -7,16 +7,39 @@
  * - name: custom display name shown in the dashboard (maintained here, not from API)
  */
 
+export type EmployeeStatus = "tenured" | "probationary";
+
 export interface Employee {
   acronym: string;
   name: string;
+  status: EmployeeStatus;
+  startDate: string | null;
+  reviewDate: string | null;
 }
 
 /** Custom mapping of acronym → display name. Add or edit entries as needed. */
 export const EMPLOYEES: Employee[] = [
-  { acronym: "HM", name: "Employee HM" },
-  { acronym: "ABC", name: "Employee ABC" },
-  { acronym: "XYZ", name: "Employee XYZ" },
+  {
+    acronym: "HM",
+    name: "Employee HM",
+    status: "tenured",
+    startDate: null,
+    reviewDate: null,
+  },
+  {
+    acronym: "ABC",
+    name: "Employee ABC",
+    status: "tenured",
+    startDate: null,
+    reviewDate: null,
+  },
+  {
+    acronym: "XYZ",
+    name: "Employee XYZ",
+    status: "tenured",
+    startDate: null,
+    reviewDate: null,
+  },
 ];
 
 /** Periods shown in the table (P1, P2, etc.). Add more when backend supports them. */

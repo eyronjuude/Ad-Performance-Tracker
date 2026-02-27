@@ -24,6 +24,14 @@ COL_SPEND = "spend_sum"
 COL_REVENUE = "placed_order_total_revenue_sum_direct_session"
 
 
+def _get_date_column() -> str:
+    """Return the BigQuery column used for date-range filtering.
+
+    Configurable via BIGQUERY_DATE_COLUMN env var; defaults to ``day``.
+    """
+    return os.environ.get("BIGQUERY_DATE_COLUMN", "day")
+
+
 def _get_bigquery_credentials():
     """
     Resolve credentials for BigQuery.
@@ -92,23 +100,23 @@ _cache_lock = threading.Lock()
 
 
 def _get_cached_performance(
-    acronym: str,
+    cache_key: str,
 ) -> list[dict[str, Any]] | None:
     """Return cached result if present and not expired, else None."""
     with _cache_lock:
-        entry = _performance_cache.get(acronym)
+        entry = _performance_cache.get(cache_key)
         if entry is None:
             return None
         cached_at, data = entry
         if _time.monotonic() - cached_at > PERFORMANCE_CACHE_TTL_SECONDS:
-            del _performance_cache[acronym]
+            del _performance_cache[cache_key]
             return None
         return data
 
 
-def _set_cached_performance(acronym: str, data: list[dict[str, Any]]) -> None:
+def _set_cached_performance(cache_key: str, data: list[dict[str, Any]]) -> None:
     with _cache_lock:
-        _performance_cache[acronym] = (_time.monotonic(), data)
+        _performance_cache[cache_key] = (_time.monotonic(), data)
 
 
 @router.get("/sample", response_model=list[dict[str, Any]])
@@ -130,7 +138,6 @@ def get_sample_rows(
                 "BIGQUERY_DATASET, BIGQUERY_TABLE"
             ),
         )
-    # Use backticks for safe identifier quoting (project.dataset.table)
     full_table = f"`{project}`.`{dataset}`.`{table}`"
     query = f"SELECT * FROM {full_table} LIMIT {SAMPLE_LIMIT}"
     try:
@@ -140,7 +147,6 @@ def get_sample_rows(
         raise HTTPException(
             status_code=502, detail=f"BigQuery request failed: {e!s}"
         ) from e
-    # Convert Row to dict and ensure JSON-serializable values
     out: list[dict[str, Any]] = []
     for row in rows:
         raw = dict(row)
@@ -154,13 +160,29 @@ def _acronym_word_regex(acronym: str) -> str:
     return f"(^|[^a-zA-Z]){escaped}([^a-zA-Z]|$)"
 
 
-def _build_performance_query(full_table: str) -> str:
-    """Build SQL for P1 + employee_acronym filter, dedup by ad_name, adset_name.
+def _build_performance_query(
+    full_table: str,
+    *,
+    p1_only: bool = True,
+    has_date_filter: bool = False,
+) -> str:
+    """Build SQL for employee_acronym filter, dedup by ad_name, adset_name.
 
-    - P1: substring 'P1' in ad_name (case-insensitive; may be surrounded by symbols).
-    - employee_acronym: substring in adset_name as a word—surrounded only by non-letters
-      (e.g. CPA does not match CP; SC_P_HM_US matches HM).
+    When *p1_only* is True the query includes a P1 substring filter on ad_name.
+    When *has_date_filter* is True the query includes a BETWEEN predicate on
+    the configured date column.
     """
+    regex_clause = "REGEXP_CONTAINS(LOWER({adset}), @acronym_regex)".format(
+        adset=COL_ADSET_NAME
+    )
+    where_clauses = [regex_clause]
+    if p1_only:
+        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%p1%'")
+    if has_date_filter:
+        date_col = _get_date_column()
+        where_clauses.append(f"DATE({date_col}) BETWEEN @start_date AND @end_date")
+    where = "\n      AND ".join(where_clauses)
+
     return f"""
     SELECT
         {COL_AD_NAME} AS ad_name,
@@ -168,20 +190,35 @@ def _build_performance_query(full_table: str) -> str:
         SUM({COL_SPEND}) AS spend,
         SAFE_DIVIDE(SUM({COL_REVENUE}), SUM({COL_SPEND})) AS croas
     FROM {full_table}
-    WHERE LOWER({COL_AD_NAME}) LIKE '%p1%'
-      AND REGEXP_CONTAINS(LOWER({COL_ADSET_NAME}), @acronym_regex)
+    WHERE {where}
     GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
     ORDER BY spend DESC
     """
 
 
-def _build_performance_summary_query(full_table: str) -> str:
+def _build_performance_summary_query(
+    full_table: str,
+    *,
+    p1_only: bool = True,
+    has_date_filter: bool = False,
+) -> str:
     """Build SQL returning a single-row summary.
 
     Returns total_spend, blended_croas, row_count by pushing the
     final aggregation into BigQuery so the backend receives one row
     instead of materializing thousands of per-ad rows in memory.
     """
+    regex_clause = "REGEXP_CONTAINS(LOWER({adset}), @acronym_regex)".format(
+        adset=COL_ADSET_NAME
+    )
+    where_clauses = [regex_clause]
+    if p1_only:
+        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%p1%'")
+    if has_date_filter:
+        date_col = _get_date_column()
+        where_clauses.append(f"DATE({date_col}) BETWEEN @start_date AND @end_date")
+    where = "\n          AND ".join(where_clauses)
+
     return f"""
     WITH per_ad AS (
         SELECT
@@ -190,8 +227,7 @@ def _build_performance_summary_query(full_table: str) -> str:
             SUM({COL_SPEND}) AS spend,
             SUM({COL_REVENUE}) AS revenue
         FROM {full_table}
-        WHERE LOWER({COL_AD_NAME}) LIKE '%p1%'
-          AND REGEXP_CONTAINS(LOWER({COL_ADSET_NAME}), @acronym_regex)
+        WHERE {where}
         GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
     )
     SELECT
@@ -202,6 +238,34 @@ def _build_performance_summary_query(full_table: str) -> str:
     """
 
 
+def _build_cache_key(
+    acronym: str,
+    p1_only: bool,
+    start_date: str | None,
+    end_date: str | None,
+) -> str:
+    parts = [acronym.strip().lower()]
+    parts.append("p1" if p1_only else "all")
+    if start_date and end_date:
+        parts.append(f"{start_date}_{end_date}")
+    return "|".join(parts)
+
+
+def _build_query_params(
+    acronym_regex: str,
+    p1_only: bool,
+    start_date: str | None,
+    end_date: str | None,
+) -> list[bigquery.ScalarQueryParameter]:
+    params: list[bigquery.ScalarQueryParameter] = [
+        bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
+    ]
+    if not p1_only and start_date and end_date:
+        params.append(bigquery.ScalarQueryParameter("start_date", "DATE", start_date))
+        params.append(bigquery.ScalarQueryParameter("end_date", "DATE", end_date))
+    return params
+
+
 @router.get("/performance", response_model=list[dict[str, Any]])
 def get_performance(
     client: bigquery.Client = Depends(get_bigquery_client),
@@ -210,14 +274,27 @@ def get_performance(
         min_length=1,
         description="Acronym as word in adset_name (non-letters only)",
     ),
+    p1_only: bool = Query(
+        True,
+        description="Filter to P1 ads only. Set false for probationary date-range.",
+    ),
+    start_date: str | None = Query(
+        None,
+        description="Start of date range (YYYY-MM-DD). Used when p1_only=false.",
+    ),
+    end_date: str | None = Query(
+        None,
+        description="End of date range (YYYY-MM-DD). Used when p1_only=false.",
+    ),
 ) -> list[dict[str, Any]]:
     """
-    Return deduplicated ad performance for P1 campaigns by employee acronym.
+    Return deduplicated ad performance by employee acronym.
 
-    Results are cached in-memory for PERFORMANCE_CACHE_TTL seconds (default 300)
-    to avoid redundant BigQuery round-trips.
+    By default filters to P1 campaigns. When ``p1_only=false`` and dates are
+    provided, filters by the configured date column instead.
     """
-    cache_key = employee_acronym.strip().lower()
+    has_date_filter = not p1_only and bool(start_date) and bool(end_date)
+    cache_key = _build_cache_key(employee_acronym, p1_only, start_date, end_date)
     cached = _get_cached_performance(cache_key)
     if cached is not None:
         return cached
@@ -234,12 +311,14 @@ def get_performance(
             ),
         )
     full_table = f"`{project}`.`{dataset}`.`{table}`"
-    query = _build_performance_query(full_table)
+    query = _build_performance_query(
+        full_table, p1_only=p1_only, has_date_filter=has_date_filter
+    )
     acronym_regex = _acronym_word_regex(employee_acronym)
     job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
-        ]
+        query_parameters=_build_query_params(
+            acronym_regex, p1_only, start_date, end_date
+        ),
     )
     try:
         query_job = client.query(query, job_config=job_config)
@@ -261,21 +340,21 @@ _summary_cache: dict[str, tuple[float, dict[str, Any]]] = {}
 _summary_cache_lock = threading.Lock()
 
 
-def _get_cached_summary(acronym: str) -> dict[str, Any] | None:
+def _get_cached_summary(cache_key: str) -> dict[str, Any] | None:
     with _summary_cache_lock:
-        entry = _summary_cache.get(acronym)
+        entry = _summary_cache.get(cache_key)
         if entry is None:
             return None
         cached_at, data = entry
         if _time.monotonic() - cached_at > PERFORMANCE_CACHE_TTL_SECONDS:
-            del _summary_cache[acronym]
+            del _summary_cache[cache_key]
             return None
         return data
 
 
-def _set_cached_summary(acronym: str, data: dict[str, Any]) -> None:
+def _set_cached_summary(cache_key: str, data: dict[str, Any]) -> None:
     with _summary_cache_lock:
-        _summary_cache[acronym] = (_time.monotonic(), data)
+        _summary_cache[cache_key] = (_time.monotonic(), data)
 
 
 @router.get("/performance/summary")
@@ -286,16 +365,27 @@ def get_performance_summary(
         min_length=1,
         description="Acronym as word in adset_name (non-letters only)",
     ),
+    p1_only: bool = Query(
+        True,
+        description="Filter to P1 ads only. Set false for probationary date-range.",
+    ),
+    start_date: str | None = Query(
+        None,
+        description="Start of date range (YYYY-MM-DD). Used when p1_only=false.",
+    ),
+    end_date: str | None = Query(
+        None,
+        description="End of date range (YYYY-MM-DD). Used when p1_only=false.",
+    ),
 ) -> dict[str, Any]:
     """
-    Return aggregated performance summary for P1 campaigns by employee acronym.
+    Return aggregated performance summary by employee acronym.
 
-    Unlike /performance which returns every ad row, this endpoint pushes the
-    final aggregation into BigQuery and returns a single object with
-    total_spend, blended_croas, and row_count.  This dramatically reduces
-    backend memory usage and network transfer.
+    By default filters to P1 campaigns. When ``p1_only=false`` and dates are
+    provided, filters by the configured date column instead.
     """
-    cache_key = employee_acronym.strip().lower()
+    has_date_filter = not p1_only and bool(start_date) and bool(end_date)
+    cache_key = _build_cache_key(employee_acronym, p1_only, start_date, end_date)
     cached = _get_cached_summary(cache_key)
     if cached is not None:
         return cached
@@ -312,12 +402,14 @@ def get_performance_summary(
             ),
         )
     full_table = f"`{project}`.`{dataset}`.`{table}`"
-    query = _build_performance_summary_query(full_table)
+    query = _build_performance_summary_query(
+        full_table, p1_only=p1_only, has_date_filter=has_date_filter
+    )
     acronym_regex = _acronym_word_regex(employee_acronym)
     job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
-        ]
+        query_parameters=_build_query_params(
+            acronym_regex, p1_only, start_date, end_date
+        ),
     )
     try:
         query_job = client.query(query, job_config=job_config)

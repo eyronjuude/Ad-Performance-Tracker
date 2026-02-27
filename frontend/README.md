@@ -9,14 +9,14 @@ This is the frontend for the Ad Performance Tracker, built with [Next.js](https:
 bun dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) to view the P1 Ad Performance Dashboard.
+3. Open [http://localhost:3000](http://localhost:3000) to view the Ad Performance Dashboard.
 
 ## Pages
 
-- **/** — P1 Ad Performance Dashboard (also linked as “Dashboard” in sidebar)
-- **/settings** — Configure employee name ↔ acronym mapping, Spend (AUD) and cROAS evaluation thresholds, and other options
-- **/dashboard** — Redirects to /
-- **/ads** — Ads detail page (placeholder; full implementation pending)
+- **/** -- Ad Performance Dashboard with separate Tenured and Probationary employee sections
+- **/settings** -- Configure employee name/acronym mapping, tenured/probationary status with start/review dates, Spend (AUD) and cROAS evaluation thresholds
+- **/dashboard** -- Redirects to /
+- **/ads** -- Ads detail page (P1 filter for tenured, date-range filter for probationary)
 
 ## Sidebar
 
@@ -24,8 +24,8 @@ The app includes a sidebar for navigation between Dashboard and Settings. Settin
 
 ## Configuration
 
-- **Employees**: Edit `lib/config.ts` (`EMPLOYEES`) to add or change employees.
-- **Evaluation keys**: Edit `lib/config.ts` (`SPEND_EVALUATION_KEY`, `CROAS_EVALUATION_KEY`) to adjust spend and CROAS thresholds and colors.
+- **Employees**: Configure in Settings page or edit `lib/config.ts` (`EMPLOYEES`) for defaults.
+- **Evaluation keys**: Configure in Settings page or edit `lib/config.ts` (`SPEND_EVALUATION_KEY`, `CROAS_EVALUATION_KEY`).
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

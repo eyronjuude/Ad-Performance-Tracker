@@ -10,10 +10,17 @@ function renderWithProvider(ui: ReactElement) {
 }
 
 describe("Home page (dashboard)", () => {
-  it("renders the P1 Ad Performance Dashboard heading", () => {
+  it("renders the Ad Performance Dashboard heading", () => {
     renderWithProvider(<Home />);
     expect(
-      screen.getByRole("heading", { name: /P1 Ad Performance Dashboard/i })
+      screen.getByRole("heading", { name: /Ad Performance Dashboard/i })
+    ).toBeInTheDocument();
+  });
+
+  it("renders Tenured Employees section heading when tenured employees exist", () => {
+    renderWithProvider(<Home />);
+    expect(
+      screen.getByRole("heading", { name: /Tenured Employees/i })
     ).toBeInTheDocument();
   });
 
@@ -67,5 +74,12 @@ describe("Home page (dashboard)", () => {
     const links = screen.getAllByRole("link", { name: /View Ads/i });
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveAttribute("href", "/ads?employee_acronym=HM");
+  });
+
+  it("does not render Probationary Employees section when none exist", () => {
+    renderWithProvider(<Home />);
+    expect(
+      screen.queryByRole("heading", { name: /Probationary Employees/i })
+    ).not.toBeInTheDocument();
   });
 });

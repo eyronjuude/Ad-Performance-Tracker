@@ -38,7 +38,7 @@
           "bigquery"
         ],
         "summary": "Get Performance",
-        "description": "Return deduplicated ad performance for P1 campaigns by employee acronym.\n\n- P1: substring in ad_name (e.g. MP1, RRL - P1).\n- employee_acronym: word in adset_name, non-letters only (_HM_ matches HM).\nSame (ad_name, adset_name) merged: spend summed, cROAS spend-weighted average.\nRequires GCP_PROJECT, BIGQUERY_DATASET, BIGQUERY_TABLE.",
+        "description": "Return deduplicated ad performance by employee acronym.\n\nBy default filters to P1 campaigns. When ``p1_only=false`` and dates are\nprovided, filters by the configured date column instead.",
         "operationId": "get_performance_api_bigquery_performance_get",
         "parameters": [
           {
@@ -52,6 +52,54 @@
               "title": "Employee Acronym"
             },
             "description": "Acronym as word in adset_name (non-letters only)"
+          },
+          {
+            "name": "p1_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "When true, filter to P1 ads only. Set false for probationary date-range queries.",
+              "default": true,
+              "title": "P1 Only"
+            },
+            "description": "When true, filter to P1 ads only. Set false for probationary date-range queries."
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of date range (YYYY-MM-DD). Used when p1_only=false.",
+              "title": "Start Date"
+            },
+            "description": "Start of date range (YYYY-MM-DD). Used when p1_only=false."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of date range (YYYY-MM-DD). Used when p1_only=false.",
+              "title": "End Date"
+            },
+            "description": "End of date range (YYYY-MM-DD). Used when p1_only=false."
           }
         ],
         "responses": {
@@ -66,6 +114,102 @@
                     "additionalProperties": true
                   },
                   "title": "Response Get Performance Api Bigquery Performance Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bigquery/performance/summary": {
+      "get": {
+        "tags": [
+          "bigquery"
+        ],
+        "summary": "Get Performance Summary",
+        "description": "Return aggregated performance summary by employee acronym.\n\nBy default filters to P1 campaigns. When ``p1_only=false`` and dates are\nprovided, filters by the configured date column instead.",
+        "operationId": "get_performance_summary_api_bigquery_performance_summary_get",
+        "parameters": [
+          {
+            "name": "employee_acronym",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Acronym as word in adset_name (non-letters only)",
+              "title": "Employee Acronym"
+            },
+            "description": "Acronym as word in adset_name (non-letters only)"
+          },
+          {
+            "name": "p1_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "When true, filter to P1 ads only. Set false for probationary date-range queries.",
+              "default": true,
+              "title": "P1 Only"
+            },
+            "description": "When true, filter to P1 ads only. Set false for probationary date-range queries."
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of date range (YYYY-MM-DD). Used when p1_only=false.",
+              "title": "Start Date"
+            },
+            "description": "Start of date range (YYYY-MM-DD). Used when p1_only=false."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of date range (YYYY-MM-DD). Used when p1_only=false.",
+              "title": "End Date"
+            },
+            "description": "End of date range (YYYY-MM-DD). Used when p1_only=false."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Performance Summary Api Bigquery Performance Summary Get"
                 }
               }
             }
