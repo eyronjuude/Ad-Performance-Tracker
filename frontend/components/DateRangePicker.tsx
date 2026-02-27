@@ -70,7 +70,7 @@ export function DateRangePicker({
       setTempRange(dateRange);
       isSelectingEnd.current = false;
     }
-  }, [open, startDate, endDate]);
+  }, [open, dateRange]);
 
   const handleDayClick = React.useCallback(
     (day: Date) => {
@@ -87,7 +87,7 @@ export function DateRangePicker({
         isSelectingEnd.current = false;
       }
     },
-    [tempRange?.from]
+    [tempRange]
   );
 
   const handleApply = React.useCallback(() => {
