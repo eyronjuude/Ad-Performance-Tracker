@@ -119,4 +119,59 @@ describe("Settings page", () => {
       screen.queryByRole("heading", { name: /Settings/i })
     ).not.toBeInTheDocument();
   });
+
+  it("displays spend thresholds with $ and thousand separators", async () => {
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", {
+      name: /Spend evaluation thresholds/i,
+    });
+
+    const minInputs = screen.getAllByLabelText(/Minimum value/i);
+    const spendMinInput = minInputs[2]; // At least one spend min (red: 0–10,000)
+    expect(spendMinInput).toHaveValue("$0");
+
+    const maxInputs = screen.getAllByLabelText(
+      /Maximum value.*empty for no cap/i
+    );
+    const spendMaxInput = maxInputs[2]; // Red row max
+    expect(spendMaxInput).toHaveValue("$10,000");
+  });
+
+  it("accepts zero in spend min input", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", {
+      name: /Spend evaluation thresholds/i,
+    });
+
+    const minInputs = screen.getAllByLabelText(/Minimum value/i);
+    const spendMinInput = minInputs[2];
+    await user.clear(spendMinInput);
+    await user.type(spendMinInput, "0");
+
+    expect(spendMinInput).toHaveValue("$0");
+  });
+
+  it("accepts zero in cROAS min and max inputs", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", {
+      name: /cROAS evaluation thresholds/i,
+    });
+
+    const minInputs = screen.getAllByLabelText(/Minimum value/i);
+    const maxInputs = screen.getAllByLabelText(
+      /Maximum value.*empty for no cap/i
+    );
+    const croasMinInput = minInputs[3]; // First cROAS min
+    const croasMaxInput = maxInputs[3]; // First cROAS max
+
+    await user.clear(croasMinInput);
+    await user.type(croasMinInput, "0");
+    expect(croasMinInput).toHaveValue(0);
+
+    await user.clear(croasMaxInput);
+    await user.type(croasMaxInput, "0");
+    expect(croasMaxInput).toHaveValue(0);
+  });
 });
