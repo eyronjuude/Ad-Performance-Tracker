@@ -88,26 +88,25 @@ describe("Settings page", () => {
     }
   });
 
-  it("date range picker is disabled for tenured employees", async () => {
+  it("Start date and Review date pickers are disabled for tenured employees", async () => {
     renderWithProvider(<SettingsPage />);
-    const dateRangePickers = await screen.findAllByLabelText(
-      /Start and review date range/i
-    );
-    for (const picker of dateRangePickers) {
+    const startPickers = await screen.findAllByLabelText(/Start date/i);
+    const reviewPickers = await screen.findAllByLabelText(/Review date/i);
+    for (const picker of [...startPickers, ...reviewPickers]) {
       expect(picker).toBeDisabled();
     }
   });
 
-  it("date range picker is enabled when status is changed to probationary", async () => {
+  it("Start date and Review date pickers are enabled when status is changed to probationary", async () => {
     const user = userEvent.setup();
     renderWithProvider(<SettingsPage />);
     const selects = await screen.findAllByLabelText(/Employee status/i);
     await user.selectOptions(selects[0], "probationary");
 
-    const dateRangePickers = screen.getAllByLabelText(
-      /Start and review date range/i
-    );
-    expect(dateRangePickers[0]).toBeEnabled();
+    const startPickers = screen.getAllByLabelText(/Start date/i);
+    const reviewPickers = screen.getAllByLabelText(/Review date/i);
+    expect(startPickers[0]).toBeEnabled();
+    expect(reviewPickers[0]).toBeEnabled();
   });
 
   it("shows skeleton while settings are loading", () => {

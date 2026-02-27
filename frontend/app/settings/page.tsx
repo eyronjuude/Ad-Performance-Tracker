@@ -1,6 +1,6 @@
 "use client";
 
-import { DateRangePicker } from "@/components/DateRangePicker";
+import { DatePicker } from "@/components/DatePicker";
 import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { useSettings } from "@/components/SettingsProvider";
 import type {
@@ -116,23 +116,26 @@ function EmployeeMappingSection() {
                   <option value="probationary">Probationary employee</option>
                 </select>
 
-                <label className="flex flex-col gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                  <DateRangePicker
-                    startDate={emp.startDate}
-                    endDate={emp.reviewDate}
-                    onRangeChange={(startDate, endDate) =>
-                      updateEmployee(i, { startDate, reviewDate: endDate })
-                    }
+                <div className="flex flex-wrap items-end gap-3">
+                  <DatePicker
+                    label="Start date"
+                    value={emp.startDate}
+                    onChange={(startDate) => updateEmployee(i, { startDate })}
                     disabled={datesDisabled}
-                    placeholder={
-                      isTenured
-                        ? "Not required for tenured employees"
-                        : "Pick start and review dates for probation period"
-                    }
-                    id={`employee-${i}-date-range`}
-                    aria-label="Start and review date range"
+                    placeholder={isTenured ? "Not required" : "dd MMM yyyy"}
+                    id={`employee-${i}-start-date`}
+                    aria-label="Start date"
                   />
-                </label>
+                  <DatePicker
+                    label="Review date"
+                    value={emp.reviewDate}
+                    onChange={(reviewDate) => updateEmployee(i, { reviewDate })}
+                    disabled={datesDisabled}
+                    placeholder={isTenured ? "Not required" : "dd MMM yyyy"}
+                    id={`employee-${i}-review-date`}
+                    aria-label="Review date"
+                  />
+                </div>
               </div>
 
               {hasDateWarning && (
