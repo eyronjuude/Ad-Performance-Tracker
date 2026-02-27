@@ -88,28 +88,26 @@ describe("Settings page", () => {
     }
   });
 
-  it("date inputs are disabled for tenured employees", async () => {
+  it("date range picker is disabled for tenured employees", async () => {
     renderWithProvider(<SettingsPage />);
-    const startInputs = await screen.findAllByLabelText(/Start date/i);
-    const reviewInputs = await screen.findAllByLabelText(/Review date/i);
-    for (const input of startInputs) {
-      expect(input).toBeDisabled();
-    }
-    for (const input of reviewInputs) {
-      expect(input).toBeDisabled();
+    const dateRangePickers = await screen.findAllByLabelText(
+      /Start and review date range/i
+    );
+    for (const picker of dateRangePickers) {
+      expect(picker).toBeDisabled();
     }
   });
 
-  it("date inputs are enabled when status is changed to probationary", async () => {
+  it("date range picker is enabled when status is changed to probationary", async () => {
     const user = userEvent.setup();
     renderWithProvider(<SettingsPage />);
     const selects = await screen.findAllByLabelText(/Employee status/i);
     await user.selectOptions(selects[0], "probationary");
 
-    const startInputs = screen.getAllByLabelText(/Start date/i);
-    const reviewInputs = screen.getAllByLabelText(/Review date/i);
-    expect(startInputs[0]).toBeEnabled();
-    expect(reviewInputs[0]).toBeEnabled();
+    const dateRangePickers = screen.getAllByLabelText(
+      /Start and review date range/i
+    );
+    expect(dateRangePickers[0]).toBeEnabled();
   });
 
   it("shows skeleton while settings are loading", () => {

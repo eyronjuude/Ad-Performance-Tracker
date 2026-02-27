@@ -1,5 +1,6 @@
 "use client";
 
+import { DateRangePicker } from "@/components/DateRangePicker";
 import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { useSettings } from "@/components/SettingsProvider";
 import type {
@@ -115,43 +116,18 @@ function EmployeeMappingSection() {
                   <option value="probationary">Probationary employee</option>
                 </select>
 
-                <label className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                  Start date
-                  <input
-                    type="date"
-                    value={emp.startDate ?? ""}
-                    disabled={datesDisabled}
-                    onChange={(e) =>
-                      updateEmployee(i, {
-                        startDate: e.target.value || null,
-                      })
+                <label className="flex flex-col gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+                  <span>Start – Review date</span>
+                  <DateRangePicker
+                    startDate={emp.startDate}
+                    endDate={emp.reviewDate}
+                    onRangeChange={(startDate, endDate) =>
+                      updateEmployee(i, { startDate, reviewDate: endDate })
                     }
-                    aria-label="Start date"
-                    className={`rounded-md border px-3 py-2 text-sm ${
-                      datesDisabled
-                        ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-600"
-                        : "border-zinc-300 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-                    }`}
-                  />
-                </label>
-
-                <label className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
-                  Review date
-                  <input
-                    type="date"
-                    value={emp.reviewDate ?? ""}
                     disabled={datesDisabled}
-                    onChange={(e) =>
-                      updateEmployee(i, {
-                        reviewDate: e.target.value || null,
-                      })
-                    }
-                    aria-label="Review date"
-                    className={`rounded-md border px-3 py-2 text-sm ${
-                      datesDisabled
-                        ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-600"
-                        : "border-zinc-300 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
-                    }`}
+                    placeholder="Pick start and review dates"
+                    id={`employee-${i}-date-range`}
+                    aria-label="Start and review date range"
                   />
                 </label>
               </div>
