@@ -1,0 +1,24 @@
+---
+description: Use shadcn components for form controls instead of native HTML
+alwaysApply: true
+---
+
+# Prefer shadcn for Form Controls
+
+For date pickers, selects, and other form controls, use **shadcn** components instead of native HTML elements.
+
+## Guidelines
+
+- **Date picker**: Use shadcn date picker (single or range) from `components/ui/calendar` + `DateRangePicker`—not `<input type="date">`
+- **Select**: Use shadcn Select—not native `<select>`
+- **Add components**: Run `bunx shadcn@latest add <component>` from the frontend directory
+
+## Rationale
+
+Native HTML controls vary by browser and OS, lack consistent styling, and often offer poorer UX (e.g. date picker differs on mobile vs desktop). shadcn components are accessible, themeable, and consistent with the rest of the UI.
+
+## Checklist
+
+1. Adding a date/range picker? → Use shadcn calendar or DateRangePicker
+2. Adding a select/dropdown? → Use shadcn Select
+3. New control type? → Check shadcn registry first; add via CLI if available
