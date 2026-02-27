@@ -61,7 +61,7 @@ export function DatePicker({
 
   React.useEffect(() => {
     if (open) setTempDate(date);
-  }, [open, value]);
+  }, [open, date]);
 
   const handleSelect = React.useCallback((d: Date | undefined) => {
     setTempDate(d);
@@ -87,7 +87,7 @@ export function DatePicker({
     const maxDateObj = maxDate ? toDate(maxDate) : undefined;
     const after = maxDateObj && maxDateObj < today ? maxDateObj : today;
     return { before, after };
-  }, [minDate, maxDate]);
+  }, [minDate, maxDate, today]);
 
   const triggerContent = date ? (
     format(date, DISPLAY_FORMAT)
