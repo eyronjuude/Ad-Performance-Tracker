@@ -56,7 +56,7 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const date = toDate(value);
+  const date = React.useMemo(() => toDate(value), [value]);
   const [tempDate, setTempDate] = React.useState<Date | undefined>(() => date);
 
   React.useEffect(() => {
