@@ -10,7 +10,7 @@ plan → execute → check → commit
 
 | Stage | Purpose | Agents |
 |-------|---------|--------|
-| **Plan** | Clarify scope, break down tasks, research unknowns | `plan-agent`, `researcher-agent` |
+| **Plan** | Clarify scope, break down tasks, research unknowns | `plan-agent`, `researcher-agent`, `trello-agent` |
 | **Execute** | Implement features (backend, frontend, or both) | `implement-agent`, `backend-agent`, `frontend-agent` |
 | **Check** | Verify, test, audit, debug failures | `tester-agent`, `security-agent`, `debug-agent`, `docs-agent` |
 | **Commit** | Commit and push with standards | `git-agent` |
@@ -20,6 +20,7 @@ plan → execute → check → commit
 | Command | Stage | Agent |
 |---------|-------|-------|
 | `/plan` | Plan | plan-agent |
+| `/trello` | Plan | trello-agent (parse transcript → create Trello cards) |
 | `/implement` | Execute | implement-agent |
 | `/debug` | Check | debug-agent |
 | `/security-audit` | Check | security-agent |
