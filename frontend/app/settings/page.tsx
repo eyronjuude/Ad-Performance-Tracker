@@ -200,14 +200,14 @@ function ThresholdRow({
   const minDisplay =
     isCurrency && typeof threshold.min === "number"
       ? formatCurrency(threshold.min)
-      : threshold.min != null && threshold.min !== ""
+      : threshold.min != null
         ? String(threshold.min)
         : "";
 
   const maxDisplay =
     isCurrency && threshold.max != null
       ? formatCurrency(threshold.max)
-      : threshold.max != null && threshold.max !== ""
+      : threshold.max != null
         ? String(threshold.max)
         : "";
 

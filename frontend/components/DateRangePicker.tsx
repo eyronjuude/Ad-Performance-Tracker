@@ -64,13 +64,14 @@ export function DateRangePicker({
     () => dateRange
   );
 
-  // Sync tempRange when popover opens or committed range changes
+  // Sync tempRange when popover opens or committed range changes.
+  // Use startDate/endDate (primitives) as deps to avoid dateRange object reference changing every render.
   React.useEffect(() => {
     if (open) {
-      setTempRange(dateRange);
+      setTempRange(toDateRange(startDate, endDate));
       isSelectingEnd.current = false;
     }
-  }, [open, dateRange]);
+  }, [open, startDate, endDate]);
 
   const handleDayClick = React.useCallback(
     (day: Date) => {
@@ -102,10 +103,10 @@ export function DateRangePicker({
   }, [tempRange, onRangeChange]);
 
   const handleCancel = React.useCallback(() => {
-    setTempRange(dateRange);
+    setTempRange(toDateRange(startDate, endDate));
     isSelectingEnd.current = false;
     setOpen(false);
-  }, [dateRange]);
+  }, [startDate, endDate]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
