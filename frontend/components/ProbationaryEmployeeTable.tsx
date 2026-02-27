@@ -67,6 +67,9 @@ export function ProbationaryEmployeeTable({
             <th className="px-4 py-3 text-right font-medium text-zinc-600 dark:text-zinc-400">
               Spend (AUD)
             </th>
+            <th className="px-4 py-3 text-right font-medium text-zinc-600 dark:text-zinc-400">
+              cROAS
+            </th>
             <th className="px-4 py-3 text-center font-medium text-zinc-600 dark:text-zinc-400">
               Spend Evaluation
             </th>
@@ -140,6 +143,17 @@ export function ProbationaryEmployeeTable({
                   ) : (
                     "—"
                   )}
+                </td>
+                <td className="px-4 py-3 text-right text-zinc-900 tabular-nums dark:text-zinc-50">
+                  {missingDates
+                    ? "—"
+                    : isLoading
+                      ? "…"
+                      : error
+                        ? "—"
+                        : aggregates != null
+                          ? formatCroas(aggregates.blendedCroas)
+                          : "—"}
                 </td>
                 <td className="px-4 py-3 text-center">
                   {missingDates || isLoading || error ? (
