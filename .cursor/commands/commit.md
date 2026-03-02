@@ -15,5 +15,3 @@
    - **Co-authored-by**: Add `Co-authored-by: Model Name <model@example.com>` in the footer for every AI model involved. For Composer: `Co-authored-by: Composer <noreply@cursor.com>`.
 7. Verify that the commit author in the logs (`git log`) matches the user's configured Git identity for this repository.
 8. Return everything as a single-line command to be run by the user in the terminal. Use `&&` to chain commands so they work in Windows Terminal.
-9. **Before push** (if applicable): Rebase onto `origin/<branch>` for linear history. If pushing over SSH, ensure ssh-agent has the key (`ssh-add -l`); if empty, prompt the user to run `ssh-add` first.
-10. **If the commit (or push) fails**: Always debug the failure—read the full error output, identify the cause (hooks, message format, auth, conflicts, etc.), fix it where possible, and retry. If blocked (e.g. user credentials or branch protection), report clearly what failed and what the user must do.
