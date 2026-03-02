@@ -213,7 +213,7 @@ export default function Home() {
               Tenured Employees
             </h2>
             <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              P1 ads filtered by employee acronym.
+              P1 ads grouped by employee acronym.
             </p>
             <EmployeeTable
               employees={tenuredEmployees}
@@ -231,7 +231,7 @@ export default function Home() {
               Probationary Employees
             </h2>
             <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              Filtered by employee acronym and probation date range.
+              Grouped by employee acronym and probation date range.
             </p>
             <ProbationaryEmployeeTable
               employees={probationaryEmployees}
