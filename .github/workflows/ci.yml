@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  ci:
-    name: Lint, Type-check, Test, Build
+  frontend-checks:
+    name: Frontend checks
     runs-on: ubuntu-latest
 
     defaults:
@@ -34,11 +34,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Lint
-        run: bun run lint
-
       - name: Format check (Prettier)
         run: bun run format:check
+
+      - name: Lint
+        run: bun run lint
 
       - name: Type-check
         run: bun run tsc --noEmit
@@ -46,13 +46,46 @@ jobs:
       - name: Test
         run: bun run test
 
-      - name: Build
-        run: bun run build
+  backend-checks:
+    name: Backend checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Install Ruff
-        working-directory: ${{ github.workspace }}
         run: pip install ruff
 
       - name: Format check (Ruff)
-        working-directory: ${{ github.workspace }}
         run: ruff format --check backend/ && ruff check backend/
+
+  build:
+    name: Build
+    needs: [frontend-checks, backend-checks]
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            frontend/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('frontend/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bun run build
