@@ -55,10 +55,10 @@ Returns **filtered and deduplicated** ad performance.
 
 By default filters to P1 campaigns. When `p1_only=false` and date range params are provided, filters by the configured date column instead (for probationary employees).
 
-- **P1 filter (default):** The substring `P1` must appear in `ad_name` (case-insensitive).
-- **employee_acronym:** The acronym must appear in `adset_name` as a word—surrounded only by non-letters.
+- **P1 filter (default):** The substring `__P1__` must appear in `ad_name` (case-insensitive, underscore-delimited).
+- **employee_acronym:** The acronym must appear in `ad_name` as `__XX__` (underscore-delimited, case-insensitive).
 - **Date range filter:** When `p1_only=false` and `start_date`/`end_date` are provided, rows are filtered by `DATE(BIGQUERY_DATE_COLUMN) BETWEEN start_date AND end_date`.
-- **Deduplication:** Rows with the same `(ad_name, adset_name)` are merged: `spend` is summed, `croas` is the spend-weighted average.
+- **Deduplication:** Rows with the same `ad_name` are merged: `spend` is summed, `croas` is the spend-weighted average.
 
 **Query parameters**
 
@@ -79,7 +79,6 @@ By default filters to P1 campaigns. When `p1_only=false` and date range params a
 | Field | Type | Description |
 |-------|------|-------------|
 | `ad_name` | string | Ad/campaign name (unique per row after dedup). |
-| `adset_name` | string | Ad set name (unique per row after dedup). |
 | `spend` | number | Total spend (summed over merged rows). |
 | `croas` | number | Spend-weighted average cROAS. |
 
@@ -91,7 +90,7 @@ Rows are ordered by `spend` descending.
 - `502 Bad Gateway` — BigQuery request failed.
 - `503 Service Unavailable` — BigQuery not configured or client creation failed.
 
-**Table schema:** The BigQuery table must include columns: `ad_name`, `adset_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session`. For date-range filtering, the table must also have the column configured via `BIGQUERY_DATE_COLUMN` (default: `date`). cROAS is computed as `placed_order_total_revenue_sum_direct_session / spend_sum`.
+**Table schema:** The BigQuery table must include columns: `ad_name`, `spend_sum`, `placed_order_total_revenue_sum_direct_session`. For date-range filtering, the table must also have the column configured via `BIGQUERY_DATE_COLUMN` (default: `date`). cROAS is computed as `placed_order_total_revenue_sum_direct_session / spend_sum`. Ad names encode employee acronyms as `__XX__` and phases as `__P1__` (underscore-delimited).
 
 ---
 

@@ -13,8 +13,8 @@ describe("aggregatePerformance", () => {
 
   it("sums spend and computes spend-weighted CROAS", () => {
     const rows: PerformanceRow[] = [
-      { ad_name: "A", adset_name: "X", spend: 100, croas: 2 },
-      { ad_name: "B", adset_name: "Y", spend: 200, croas: 3 },
+      { ad_name: "A", spend: 100, croas: 2 },
+      { ad_name: "B", spend: 200, croas: 3 },
     ];
     const result = aggregatePerformance(rows);
     expect(result.totalSpend).toBe(300);
@@ -24,9 +24,7 @@ describe("aggregatePerformance", () => {
   });
 
   it("handles null croas as zero", () => {
-    const rows: PerformanceRow[] = [
-      { ad_name: "A", adset_name: "X", spend: 100, croas: null },
-    ];
+    const rows: PerformanceRow[] = [{ ad_name: "A", spend: 100, croas: null }];
     const result = aggregatePerformance(rows);
     expect(result.totalSpend).toBe(100);
     expect(result.blendedCroas).toBe(0);

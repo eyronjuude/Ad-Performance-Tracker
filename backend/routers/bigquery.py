@@ -2,7 +2,6 @@
 
 import json
 import os
-import re
 import threading
 import time as _time
 from datetime import date, datetime, time
@@ -19,7 +18,6 @@ SAMPLE_LIMIT = 5
 PERFORMANCE_CACHE_TTL_SECONDS = int(os.environ.get("PERFORMANCE_CACHE_TTL", "300"))
 
 COL_AD_NAME = "ad_name"
-COL_ADSET_NAME = "adset_name"
 COL_SPEND = "spend_sum"
 COL_REVENUE = "placed_order_total_revenue_sum_direct_session"
 
@@ -155,10 +153,13 @@ def get_sample_rows(
     return out
 
 
-def _acronym_word_regex(acronym: str) -> str:
-    """Build RE2 regex for acronym as word in adset_name (non-letters only)."""
-    escaped = re.escape(acronym.strip().lower())
-    return f"(^|[^a-zA-Z]){escaped}([^a-zA-Z]|$)"
+def _acronym_substring(acronym: str) -> str:
+    """Build underscore-delimited pattern for acronym in ad_name.
+
+    Ad names encode the employee acronym as ``__XX__`` (double underscores).
+    Returns the lowercased pattern ready for a case-insensitive LIKE / CONTAINS.
+    """
+    return f"__{acronym.strip().lower()}__"
 
 
 def _build_performance_query(
@@ -167,18 +168,16 @@ def _build_performance_query(
     p1_only: bool = True,
     has_date_filter: bool = False,
 ) -> str:
-    """Build SQL for employee_acronym filter, dedup by ad_name, adset_name.
+    """Build SQL for employee_acronym filter, dedup by ad_name only.
 
-    When *p1_only* is True the query includes a P1 substring filter on ad_name.
-    When *has_date_filter* is True the query includes a BETWEEN predicate on
-    the configured date column.
+    When *p1_only* is True the query includes a ``__P1__`` substring filter
+    on ad_name.  When *has_date_filter* is True the query includes a BETWEEN
+    predicate on the configured date column.
     """
-    regex_clause = "REGEXP_CONTAINS(LOWER({adset}), @acronym_regex)".format(
-        adset=COL_ADSET_NAME
-    )
-    where_clauses = [regex_clause]
+    acronym_clause = f"LOWER({COL_AD_NAME}) LIKE @acronym_pattern"
+    where_clauses = [acronym_clause]
     if p1_only:
-        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%p1%'")
+        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%__p1__%'")
     if has_date_filter:
         date_col = _get_date_column()
         where_clauses.append(f"DATE({date_col}) BETWEEN @start_date AND @end_date")
@@ -187,12 +186,11 @@ def _build_performance_query(
     return f"""
     SELECT
         {COL_AD_NAME} AS ad_name,
-        {COL_ADSET_NAME} AS adset_name,
         SUM({COL_SPEND}) AS spend,
         SAFE_DIVIDE(SUM({COL_REVENUE}), SUM({COL_SPEND})) AS croas
     FROM {full_table}
     WHERE {where}
-    GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
+    GROUP BY {COL_AD_NAME}
     ORDER BY spend DESC
     """
 
@@ -209,12 +207,10 @@ def _build_performance_summary_query(
     final aggregation into BigQuery so the backend receives one row
     instead of materializing thousands of per-ad rows in memory.
     """
-    regex_clause = "REGEXP_CONTAINS(LOWER({adset}), @acronym_regex)".format(
-        adset=COL_ADSET_NAME
-    )
-    where_clauses = [regex_clause]
+    acronym_clause = f"LOWER({COL_AD_NAME}) LIKE @acronym_pattern"
+    where_clauses = [acronym_clause]
     if p1_only:
-        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%p1%'")
+        where_clauses.append(f"LOWER({COL_AD_NAME}) LIKE '%__p1__%'")
     if has_date_filter:
         date_col = _get_date_column()
         where_clauses.append(f"DATE({date_col}) BETWEEN @start_date AND @end_date")
@@ -224,12 +220,11 @@ def _build_performance_summary_query(
     WITH per_ad AS (
         SELECT
             {COL_AD_NAME},
-            {COL_ADSET_NAME},
             SUM({COL_SPEND}) AS spend,
             SUM({COL_REVENUE}) AS revenue
         FROM {full_table}
         WHERE {where}
-        GROUP BY {COL_AD_NAME}, {COL_ADSET_NAME}
+        GROUP BY {COL_AD_NAME}
     )
     SELECT
         COALESCE(SUM(spend), 0) AS total_spend,
@@ -253,13 +248,15 @@ def _build_cache_key(
 
 
 def _build_query_params(
-    acronym_regex: str,
+    acronym_pattern: str,
     p1_only: bool,
     start_date: str | None,
     end_date: str | None,
 ) -> list[bigquery.ScalarQueryParameter]:
     params: list[bigquery.ScalarQueryParameter] = [
-        bigquery.ScalarQueryParameter("acronym_regex", "STRING", acronym_regex),
+        bigquery.ScalarQueryParameter(
+            "acronym_pattern", "STRING", f"%{acronym_pattern}%"
+        ),
     ]
     if not p1_only and start_date and end_date:
         params.append(bigquery.ScalarQueryParameter("start_date", "DATE", start_date))
@@ -273,7 +270,7 @@ def get_performance(
     employee_acronym: str = Query(
         ...,
         min_length=1,
-        description="Acronym as word in adset_name (non-letters only)",
+        description="Acronym as __XX__ substring in ad_name (underscore-delimited)",
     ),
     p1_only: bool = Query(
         True,
@@ -315,10 +312,10 @@ def get_performance(
     query = _build_performance_query(
         full_table, p1_only=p1_only, has_date_filter=has_date_filter
     )
-    acronym_regex = _acronym_word_regex(employee_acronym)
+    acronym_pattern = _acronym_substring(employee_acronym)
     job_config = bigquery.QueryJobConfig(
         query_parameters=_build_query_params(
-            acronym_regex, p1_only, start_date, end_date
+            acronym_pattern, p1_only, start_date, end_date
         ),
     )
     try:
@@ -364,7 +361,7 @@ def get_performance_summary(
     employee_acronym: str = Query(
         ...,
         min_length=1,
-        description="Acronym as word in adset_name (non-letters only)",
+        description="Acronym as __XX__ substring in ad_name (underscore-delimited)",
     ),
     p1_only: bool = Query(
         True,
@@ -406,10 +403,10 @@ def get_performance_summary(
     query = _build_performance_summary_query(
         full_table, p1_only=p1_only, has_date_filter=has_date_filter
     )
-    acronym_regex = _acronym_word_regex(employee_acronym)
+    acronym_pattern = _acronym_substring(employee_acronym)
     job_config = bigquery.QueryJobConfig(
         query_parameters=_build_query_params(
-            acronym_regex, p1_only, start_date, end_date
+            acronym_pattern, p1_only, start_date, end_date
         ),
     )
     try:

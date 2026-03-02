@@ -1,8 +1,8 @@
 /**
  * Dashboard configuration: employees and evaluation keys.
  *
- * BigQuery has no employee name data—only acronyms (in ad/adset names) are used
- * for filtering. This config provides our custom mapping: acronym → display name.
+ * BigQuery has no employee name data—only acronyms (encoded as __XX__ in ad names)
+ * are used for filtering. This config provides our custom mapping: acronym → display name.
  * - acronym: used for BigQuery querying
  * - name: custom display name shown in the dashboard (maintained here, not from API)
  */

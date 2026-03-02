@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { PerformanceRow } from "@/lib/api";
 
-type SortField = "ad_name" | "adset_name" | "spend" | "croas";
+type SortField = "ad_name" | "spend" | "croas";
 type SortDir = "asc" | "desc";
 
 function formatSpendAud(value: number): string {
@@ -83,20 +83,14 @@ export function AdsTable({ rows }: AdsTableProps) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
-      setSortDir(
-        field === "ad_name" || field === "adset_name" ? "asc" : "desc"
-      );
+      setSortDir(field === "ad_name" ? "asc" : "desc");
     }
   };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return rows;
     const q = search.toLowerCase();
-    return rows.filter(
-      (r) =>
-        r.ad_name.toLowerCase().includes(q) ||
-        r.adset_name.toLowerCase().includes(q)
-    );
+    return rows.filter((r) => r.ad_name.toLowerCase().includes(q));
   }, [rows, search]);
 
   const sorted = useMemo(() => {
@@ -106,9 +100,6 @@ export function AdsTable({ rows }: AdsTableProps) {
       switch (sortField) {
         case "ad_name":
           cmp = a.ad_name.localeCompare(b.ad_name);
-          break;
-        case "adset_name":
-          cmp = a.adset_name.localeCompare(b.adset_name);
           break;
         case "spend":
           cmp = a.spend - b.spend;
@@ -145,7 +136,7 @@ export function AdsTable({ rows }: AdsTableProps) {
           </svg>
           <input
             type="text"
-            placeholder="Search ads or adsets..."
+            placeholder="Search ads..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-zinc-200 bg-white py-2 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:ring-zinc-500"
@@ -168,17 +159,6 @@ export function AdsTable({ rows }: AdsTableProps) {
                 Ad Name
                 <SortIcon
                   field="ad_name"
-                  activeField={sortField}
-                  direction={sortDir}
-                />
-              </th>
-              <th
-                className={`${thBase} text-left`}
-                onClick={() => handleSort("adset_name")}
-              >
-                Adset Name
-                <SortIcon
-                  field="adset_name"
                   activeField={sortField}
                   direction={sortDir}
                 />
@@ -211,7 +191,7 @@ export function AdsTable({ rows }: AdsTableProps) {
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={4}
                   className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400"
                 >
                   {search
@@ -222,7 +202,7 @@ export function AdsTable({ rows }: AdsTableProps) {
             ) : (
               sorted.map((row, idx) => (
                 <tr
-                  key={`${row.ad_name}-${row.adset_name}`}
+                  key={row.ad_name}
                   className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/40"
                 >
                   <td className="px-4 py-3 text-zinc-400 tabular-nums dark:text-zinc-500">
@@ -233,12 +213,6 @@ export function AdsTable({ rows }: AdsTableProps) {
                     title={row.ad_name}
                   >
                     {row.ad_name}
-                  </td>
-                  <td
-                    className="max-w-xs truncate px-4 py-3 text-zinc-700 dark:text-zinc-300"
-                    title={row.adset_name}
-                  >
-                    {row.adset_name}
                   </td>
                   <td className="px-4 py-3 text-right text-zinc-900 tabular-nums dark:text-zinc-50">
                     {formatSpendAud(row.spend)}

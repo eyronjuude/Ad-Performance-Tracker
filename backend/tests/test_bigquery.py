@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from main import app
 from routers.bigquery import (
-    _acronym_word_regex,
+    _acronym_substring,
     _build_performance_query,
     _build_performance_summary_query,
     get_bigquery_client,
@@ -94,10 +94,10 @@ def test_get_sample_returns_503_when_client_dependency_fails(
 def test_get_performance_returns_200_with_deduplicated_shape(
     client: TestClient,
 ) -> None:
-    """Performance returns 200 with ad_name, adset_name, spend, croas per row."""
+    """Performance returns 200 with ad_name, spend, croas per row."""
     mock_rows = [
-        {"ad_name": "Ad A", "adset_name": "Adset X", "spend": 100.0, "croas": 2.5},
-        {"ad_name": "Ad B", "adset_name": "Adset Y", "spend": 50.0, "croas": 1.8},
+        {"ad_name": "Ad A", "spend": 100.0, "croas": 2.5},
+        {"ad_name": "Ad B", "spend": 50.0, "croas": 1.8},
     ]
     mock_job = MagicMock()
     mock_job.result.return_value = mock_rows
@@ -122,20 +122,18 @@ def test_get_performance_returns_200_with_deduplicated_shape(
     assert len(data) == 2
     assert (
         data[0]["ad_name"] == "Ad A"
-        and data[0]["adset_name"] == "Adset X"
         and data[0]["spend"] == 100.0
         and data[0]["croas"] == 2.5
     )
     assert (
         data[1]["ad_name"] == "Ad B"
-        and data[1]["adset_name"] == "Adset Y"
         and data[1]["spend"] == 50.0
         and data[1]["croas"] == 1.8
     )
 
 
 def test_get_performance_query_uses_filter_and_dedup(client: TestClient) -> None:
-    """Performance query: P1 + employee_acronym filter, dedup by ad_name, adset_name."""
+    """Performance query: __P1__ + __acronym__ filter on ad_name, dedup by ad_name."""
     mock_job = MagicMock()
     mock_job.result.return_value = []
     mock_bq = MagicMock()
@@ -156,16 +154,16 @@ def test_get_performance_query_uses_filter_and_dedup(client: TestClient) -> None
         for key in ("GCP_PROJECT", "BIGQUERY_DATASET", "BIGQUERY_TABLE"):
             os.environ.pop(key, None)
 
-    assert "p1" in query.lower() and "ad_name" in query
-    assert "adset_name" in query and "REGEXP_CONTAINS" in query
-    assert "GROUP BY" in query and "ad_name" in query and "adset_name" in query
+    assert "__p1__" in query.lower() and "ad_name" in query
+    assert "adset_name" not in query
+    assert "GROUP BY" in query and "ad_name" in query
     assert "SUM(" in query and "spend_sum" in query
     assert (
         "SAFE_DIVIDE" in query
         and "placed_order_total_revenue_sum_direct_session" in query
     )
     params = {p.name: p.value for p in job_config.query_parameters}
-    assert params.get("acronym_regex") == "(^|[^a-zA-Z])xy([^a-zA-Z]|$)"
+    assert params.get("acronym_pattern") == "%__xy__%"
 
 
 def test_get_performance_requires_employee_acronym(client: TestClient) -> None:
@@ -185,23 +183,25 @@ def test_get_performance_requires_employee_acronym(client: TestClient) -> None:
             os.environ.pop(key, None)
 
 
-def test_acronym_word_regex() -> None:
-    """Acronym regex matches word-boundary only (surrounded by non-letters)."""
-    assert _acronym_word_regex("HM") == "(^|[^a-zA-Z])hm([^a-zA-Z]|$)"
-    assert _acronym_word_regex("CP") == "(^|[^a-zA-Z])cp([^a-zA-Z]|$)"
+def test_acronym_substring() -> None:
+    """Acronym substring uses double-underscore delimiters."""
+    assert _acronym_substring("HM") == "__hm__"
+    assert _acronym_substring("CP") == "__cp__"
+    assert _acronym_substring("  XY  ") == "__xy__"
 
 
 def test_build_performance_query_deduplication_and_blend() -> None:
-    """Query merges by ad_name, adset_name; sums spend; cROAS = revenue/spend."""
+    """Query merges by ad_name only; sums spend; cROAS = revenue/spend."""
     full_table = "`p`.`d`.`t`"
     query = _build_performance_query(full_table)
-    assert "GROUP BY" in query and "ad_name" in query and "adset_name" in query
+    assert "GROUP BY" in query and "ad_name" in query
+    assert "adset_name" not in query
     assert "SUM(spend_sum)" in query or "SUM( spend_sum )" in query
     assert "SAFE_DIVIDE" in query
     assert "placed_order_total_revenue_sum_direct_session" in query
     assert "ORDER BY spend DESC" in query
-    assert "adset_name" in query and "REGEXP_CONTAINS" in query
-    assert "%p1%" in query
+    assert "@acronym_pattern" in query
+    assert "__p1__" in query
 
 
 # --- Performance summary endpoint (aggregated single-row response) ---
@@ -296,29 +296,31 @@ def test_build_performance_summary_query_uses_cte_aggregation() -> None:
     assert "total_spend" in query
     assert "blended_croas" in query
     assert "row_count" in query
-    assert "%p1%" in query
-    assert "REGEXP_CONTAINS" in query
+    assert "__p1__" in query
+    assert "@acronym_pattern" in query
+    assert "adset_name" not in query
 
 
 def test_build_performance_query_without_p1_and_with_dates() -> None:
     """Query without P1 filter and with date range includes BETWEEN, no p1."""
     full_table = "`p`.`d`.`t`"
     query = _build_performance_query(full_table, p1_only=False, has_date_filter=True)
-    assert "%p1%" not in query
+    assert "__p1__" not in query
     assert "BETWEEN" in query
     assert "@start_date" in query
     assert "@end_date" in query
-    assert "REGEXP_CONTAINS" in query
+    assert "@acronym_pattern" in query
     assert "GROUP BY" in query
+    assert "adset_name" not in query
 
 
 def test_build_performance_query_without_p1_no_dates() -> None:
     """Query without P1 and without dates omits both predicates."""
     full_table = "`p`.`d`.`t`"
     query = _build_performance_query(full_table, p1_only=False, has_date_filter=False)
-    assert "%p1%" not in query
+    assert "__p1__" not in query
     assert "BETWEEN" not in query
-    assert "REGEXP_CONTAINS" in query
+    assert "@acronym_pattern" in query
 
 
 def test_build_summary_query_without_p1_and_with_dates() -> None:

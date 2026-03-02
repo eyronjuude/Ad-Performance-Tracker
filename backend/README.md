@@ -36,7 +36,7 @@ Quick list:
 - `GET /` – Root message
 - `GET /health` – Health check
 - `GET /api/bigquery/sample` – Up to 5 rows from the configured BigQuery table (requires BigQuery env vars)
-- `GET /api/bigquery/performance?employee_acronym=<acronym>` – Ad performance by employee acronym, deduplicated by ad name and adset name. Optional params: `p1_only` (default true), `start_date`, `end_date` for date-range filtering.
+- `GET /api/bigquery/performance?employee_acronym=<acronym>` – Ad performance by employee acronym (`__XX__` in ad name), deduplicated by ad name. Optional params: `p1_only` (default true), `start_date`, `end_date` for date-range filtering.
 - `GET /api/bigquery/performance/summary?employee_acronym=<acronym>` – Aggregated single-row summary. Same optional params as above.
 - `GET /api/settings` – App settings (employees with status/dates, evaluation thresholds, periods). Stored in Postgres (Neon) or SQLite; shared across users.
 - `PUT /api/settings` – Update app settings. Request body: same shape as GET response.

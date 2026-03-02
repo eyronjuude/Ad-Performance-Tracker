@@ -48,10 +48,10 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Acronym as word in adset_name (non-letters only)",
+              "description": "Acronym as __XX__ substring in ad_name (underscore-delimited)",
               "title": "Employee Acronym"
             },
-            "description": "Acronym as word in adset_name (non-letters only)"
+            "description": "Acronym as __XX__ substring in ad_name (underscore-delimited)"
           },
           {
             "name": "p1_only",
@@ -59,11 +59,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "When true, filter to P1 ads only. Set false for probationary date-range queries.",
+              "description": "Filter to P1 ads only. Set false for probationary date-range.",
               "default": true,
               "title": "P1 Only"
             },
-            "description": "When true, filter to P1 ads only. Set false for probationary date-range queries."
+            "description": "Filter to P1 ads only. Set false for probationary date-range."
           },
           {
             "name": "start_date",
@@ -147,10 +147,10 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Acronym as word in adset_name (non-letters only)",
+              "description": "Acronym as __XX__ substring in ad_name (underscore-delimited)",
               "title": "Employee Acronym"
             },
-            "description": "Acronym as word in adset_name (non-letters only)"
+            "description": "Acronym as __XX__ substring in ad_name (underscore-delimited)"
           },
           {
             "name": "p1_only",
@@ -158,11 +158,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "When true, filter to P1 ads only. Set false for probationary date-range queries.",
+              "description": "Filter to P1 ads only. Set false for probationary date-range.",
               "default": true,
               "title": "P1 Only"
             },
-            "description": "When true, filter to P1 ads only. Set false for probationary date-range queries."
+            "description": "Filter to P1 ads only. Set false for probationary date-range."
           },
           {
             "name": "start_date",

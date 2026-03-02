@@ -5,7 +5,6 @@ const API_BASE =
 
 export interface PerformanceRow {
   ad_name: string;
-  adset_name: string;
   spend: number;
   croas: number | null;
 }
