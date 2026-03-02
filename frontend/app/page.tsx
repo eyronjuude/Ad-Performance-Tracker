@@ -205,9 +205,6 @@ export default function Home() {
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
             Ad Performance Dashboard
           </h1>
-          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Employee ad performance data sourced from BigQuery.
-          </p>
         </header>
 
         {tenuredEmployees.length > 0 && (

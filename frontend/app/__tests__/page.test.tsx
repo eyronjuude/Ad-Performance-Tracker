@@ -98,6 +98,52 @@ describe("Home page (dashboard)", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders probationary employees as collapsible sections", async () => {
+    const settings = getDefaultSettings();
+    settings.employees.push({
+      acronym: "PRB",
+      name: "Employee PRB",
+      status: "probationary",
+      startDate: "2026-01-01",
+      reviewDate: "2026-06-01",
+    });
+    vi.mocked(fetchSettings).mockResolvedValue(settings);
+
+    renderWithProvider(<Home />);
+    expect(
+      await screen.findByRole("heading", { name: /Probationary Employees/i })
+    ).toBeInTheDocument();
+
+    const prbButton = screen.getByRole("button", { name: "Employee PRB" });
+    expect(prbButton).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("expands probationary employee section on click", async () => {
+    const user = userEvent.setup();
+    const settings = getDefaultSettings();
+    settings.employees.push({
+      acronym: "PRB",
+      name: "Employee PRB",
+      status: "probationary",
+      startDate: "2026-01-01",
+      reviewDate: "2026-06-01",
+    });
+    vi.mocked(fetchSettings).mockResolvedValue(settings);
+
+    renderWithProvider(<Home />);
+    const prbButton = await screen.findByRole("button", {
+      name: "Employee PRB",
+    });
+
+    await user.click(prbButton);
+
+    expect(prbButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Start Date")).toBeInTheDocument();
+    expect(screen.getByText("Review Date")).toBeInTheDocument();
+    expect(screen.getByText("2026-01-01")).toBeInTheDocument();
+    expect(screen.getByText("2026-06-01")).toBeInTheDocument();
+  });
+
   it("shows skeleton while settings are loading", () => {
     vi.mocked(fetchSettings).mockReturnValue(new Promise(() => {}));
 
