@@ -3,6 +3,13 @@
 import { DatePicker } from "@/components/DatePicker";
 import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { useSettings } from "@/components/SettingsProvider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   Employee,
   EmployeeStatus,
@@ -99,22 +106,27 @@ function EmployeeMappingSection() {
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <select
+                <Select
                   value={emp.status ?? "tenured"}
-                  onChange={(e) =>
+                  onValueChange={(value: string) =>
                     updateEmployee(i, {
-                      status: e.target.value as EmployeeStatus,
-                      ...(e.target.value === "tenured"
+                      status: value as EmployeeStatus,
+                      ...(value === "tenured"
                         ? { startDate: null, reviewDate: null }
                         : {}),
                     })
                   }
-                  aria-label="Employee status"
-                  className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
                 >
-                  <option value="tenured">Tenured employee</option>
-                  <option value="probationary">Probationary employee</option>
-                </select>
+                  <SelectTrigger aria-label="Employee status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tenured">Tenured employee</SelectItem>
+                    <SelectItem value="probationary">
+                      Probationary employee
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
                 <div className="flex flex-wrap items-end gap-3">
                   <DatePicker

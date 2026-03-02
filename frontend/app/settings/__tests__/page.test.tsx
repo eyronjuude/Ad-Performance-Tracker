@@ -81,10 +81,10 @@ describe("Settings page", () => {
 
   it("renders employee status selectors defaulting to Tenured", async () => {
     renderWithProvider(<SettingsPage />);
-    const selects = await screen.findAllByLabelText(/Employee status/i);
-    expect(selects.length).toBeGreaterThan(0);
-    for (const select of selects) {
-      expect(select).toHaveValue("tenured");
+    const triggers = await screen.findAllByLabelText(/Employee status/i);
+    expect(triggers.length).toBeGreaterThan(0);
+    for (const trigger of triggers) {
+      expect(trigger).toHaveTextContent(/Tenured employee/i);
     }
   });
 
@@ -100,8 +100,12 @@ describe("Settings page", () => {
   it("Start date and Review date pickers are enabled when status is changed to probationary", async () => {
     const user = userEvent.setup();
     renderWithProvider(<SettingsPage />);
-    const selects = await screen.findAllByLabelText(/Employee status/i);
-    await user.selectOptions(selects[0], "probationary");
+    const triggers = await screen.findAllByLabelText(/Employee status/i);
+    await user.click(triggers[0]);
+    const option = await screen.findByRole("option", {
+      name: /Probationary employee/i,
+    });
+    await user.click(option);
 
     const startPickers = screen.getAllByLabelText(/Start date/i);
     const reviewPickers = screen.getAllByLabelText(/Review date/i);
