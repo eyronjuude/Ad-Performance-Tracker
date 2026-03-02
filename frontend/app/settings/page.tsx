@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { Save } from "lucide-react";
 import { DatePicker } from "@/components/DatePicker";
 import { SettingsSkeleton } from "@/components/SettingsSkeleton";
 import { useSettings } from "@/components/SettingsProvider";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -415,7 +418,17 @@ function CroasEvaluationSection() {
 }
 
 export default function SettingsPage() {
-  const { error, isLoading } = useSettings();
+  const { error, isLoading, isDirty, save } = useSettings();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await save();
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return <SettingsSkeleton />;
@@ -424,13 +437,27 @@ export default function SettingsPage() {
   return (
     <div className="px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
-          Settings
-        </h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Configure employee mappings, evaluation thresholds, and other options.
-          Changes are saved automatically.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+              Settings
+            </h1>
+            <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              Configure employee mappings, evaluation thresholds, and other
+              options. Click Save to persist changes.
+            </p>
+          </div>
+          {isDirty && (
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              aria-label="Save changes"
+            >
+              <Save className="size-4" aria-hidden />
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          )}
+        </div>
       </header>
 
       {error != null && (

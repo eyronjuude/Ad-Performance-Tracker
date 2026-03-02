@@ -9,7 +9,7 @@ import { getDefaultSettings } from "@/lib/settings";
 
 vi.mock("@/lib/settings-api", () => ({
   fetchSettings: vi.fn(),
-  saveSettingsApi: vi.fn().mockResolvedValue({}),
+  saveSettingsApi: vi.fn().mockImplementation(async (settings) => settings),
 }));
 
 function renderWithProvider(ui: ReactElement) {
@@ -177,5 +177,46 @@ describe("Settings page", () => {
     await user.clear(croasMaxInput);
     await user.type(croasMaxInput, "0");
     expect(croasMaxInput).toHaveValue(0);
+  });
+
+  it("shows Save button when settings are changed", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", { name: /Settings/i });
+
+    expect(
+      screen.queryByRole("button", { name: /Save/i })
+    ).not.toBeInTheDocument();
+
+    const acronymInputs = screen.getAllByPlaceholderText("Acronym");
+    await user.clear(acronymInputs[0]);
+    await user.type(acronymInputs[0], "X");
+
+    expect(screen.getByRole("button", { name: /Save/i })).toBeInTheDocument();
+  });
+
+  it("subtitle mentions clicking Save to persist changes", async () => {
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", { name: /Settings/i });
+
+    expect(
+      screen.getByText(/Click Save to persist changes/i)
+    ).toBeInTheDocument();
+  });
+
+  it("calls saveSettingsApi when Save is clicked", async () => {
+    const { saveSettingsApi } = await import("@/lib/settings-api");
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    await screen.findByRole("heading", { name: /Settings/i });
+
+    const acronymInputs = screen.getAllByPlaceholderText("Acronym");
+    await user.clear(acronymInputs[0]);
+    await user.type(acronymInputs[0], "X");
+
+    const saveButton = screen.getByRole("button", { name: /Save/i });
+    await user.click(saveButton);
+
+    expect(saveSettingsApi).toHaveBeenCalled();
   });
 });
