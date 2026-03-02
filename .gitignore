@@ -31,6 +31,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Commit message fix workflow
+subject-suggestions.json
+
 # Logs & debug
 *.log
 npm-debug.log*

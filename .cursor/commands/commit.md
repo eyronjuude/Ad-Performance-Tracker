@@ -13,5 +13,6 @@
    - **Conventional Commits**: `<type>[scope]: <description>`. Reference: [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
    - **50/72 rule**: Subject ≤50 chars; body lines ≤72 chars.
    - **Co-authored-by**: Add `Co-authored-by: Model Name <model@example.com>` in the footer for every AI model involved. For Composer: `Co-authored-by: Composer <noreply@cursor.com>`.
+   - **Single `-m`**: Use one `-m` flag with PowerShell `` `n `` escapes. Use `` `n`n `` for blank lines (subject↔body, body↔footer) and `` `n `` for line breaks within body or footer. Do **not** use multiple `-m` flags (each `-m` creates a paragraph break).
 7. Verify that the commit author in the logs (`git log`) matches the user's configured Git identity for this repository.
 8. Return everything as a single-line command to be run by the user in the terminal. Use `&&` to chain commands so they work in Windows Terminal.

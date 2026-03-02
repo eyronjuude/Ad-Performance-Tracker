@@ -31,6 +31,32 @@ Maintain linear Git history and enforce project commit standards. Align with `.c
 4. **Commit**: Conventional format, ≤50 chars subject, body ≤72/line, Co-authored-by footer. Run from terminal so Lefthook runs.
 5. **Return**: Single-line command with `&&` for Windows Terminal.
 
+## Commit Message Formatting (Single `-m`)
+
+Use a **single** `-m` flag with PowerShell newline escapes (`` `n ``) to control line breaks precisely. Do **not** use multiple `-m` flags—each `-m` inserts a blank line (paragraph break), which bloats the commit message.
+
+| Separator | PowerShell | Purpose |
+|-----------|------------|---------|
+| Blank line | `` `n`n `` | Between subject↔body and body↔footer (required) |
+| Line break | `` `n `` | Between lines within body or within footer |
+
+### Structure
+
+```text
+<type>[scope]: <description>
+                                          ← blank line
+<body line 1, ≤72 chars>
+<body line 2, ≤72 chars>
+                                          ← blank line
+Co-authored-by: Model <email>
+```
+
+In a single `-m` string with PowerShell escapes this becomes:
+
+```text
+"<subject>`n`n<body line 1>`n<body line 2>`n`nCo-authored-by: ..."
+```
+
 ## SSH (push/pull over SSH)
 
 1. **Check**: `ssh-add -l` — keys loaded if exit 0
@@ -41,8 +67,14 @@ Before suggesting `git push` or `git pull` over SSH: If `ssh-add -l` returns no 
 
 ## Example Commit
 
-```bash
-git add . && git commit -m "feat(api): add user auth with OAuth2" -m "Implements JWT login and token refresh." -m "" -m "Co-authored-by: Composer <noreply@cursor.com>"
+```powershell
+git add . && git commit -m "feat(api): add user auth with OAuth2`n`nImplements JWT login and token refresh.`n`nCo-authored-by: Composer <noreply@cursor.com>"
+```
+
+Multi-line body (lines stay together, no extra blank lines):
+
+```powershell
+git add . && git commit -m "feat(api): add user auth`n`nAdd JWT login.`nAdd token refresh.`nAdd session management.`n`nCo-authored-by: Composer <noreply@cursor.com>"
 ```
 
 ## Checklist

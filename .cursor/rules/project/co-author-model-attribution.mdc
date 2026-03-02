@@ -42,3 +42,4 @@ When the committing agent is Cursor's built-in agent (Composer), use **Composer*
 - **Multiple models**: If more than one model contributed, list each on its own line
 - **Blank line**: Always leave a blank line between the commit body and the footer
 - **Full attribution**: Do not omit any model that contributed to the commit
+- **Single `-m` command format**: When building the `git commit` command, use one `-m` flag with PowerShell `` `n `` escapes—not multiple `-m` flags. Use `` `n`n `` for the blank line before the footer and `` `n `` between multiple co-author lines. Example: `git commit -m "feat: add feature`n`nBody.`n`nCo-authored-by: Composer <noreply@cursor.com>"`
