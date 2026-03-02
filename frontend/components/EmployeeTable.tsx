@@ -101,7 +101,7 @@ export function EmployeeTable({
                 aria-expanded={isExpanded}
                 aria-controls={`employee-panel-${employee.acronym}`}
                 onClick={() => toggleSection(employee.acronym)}
-                className="flex w-full items-center gap-2 text-left text-lg font-semibold text-zinc-900 hover:text-zinc-700 dark:text-zinc-50 dark:hover:text-zinc-300"
+                className="flex w-full cursor-pointer items-center gap-2 text-left text-lg font-semibold text-zinc-900 hover:text-zinc-700 dark:text-zinc-50 dark:hover:text-zinc-300"
               >
                 <svg
                   aria-hidden="true"
