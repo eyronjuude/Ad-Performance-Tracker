@@ -64,4 +64,18 @@ describe("DatePicker", () => {
     const popover = document.querySelector("[data-slot='popover-content']");
     expect(popover).not.toBeInTheDocument();
   });
+
+  it("allows selecting a future date when no maxDate is set", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<DatePicker value={null} onChange={onChange} />);
+    await user.click(screen.getByRole("button", { name: /Pick a date/i }));
+    const dayButton = screen.getByRole("button", { name: /28th/i });
+    expect(dayButton).toBeEnabled();
+    await user.click(dayButton);
+    await user.click(screen.getByRole("button", { name: /Apply/i }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.stringMatching(/^\d{4}-\d{2}-28$/)
+    );
+  });
 });

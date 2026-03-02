@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
+import type { DateAfter, DateBefore } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -81,13 +82,16 @@ export function DatePicker({
     setOpen(false);
   }, [date]);
 
-  const today = React.useMemo(() => new Date(), []);
-  const disabledMatcher = React.useMemo(() => {
-    const before = minDate ? toDate(minDate) : undefined;
-    const maxDateObj = maxDate ? toDate(maxDate) : undefined;
-    const after = maxDateObj && maxDateObj < today ? maxDateObj : today;
-    return { before, after };
-  }, [minDate, maxDate, today]);
+  const disabledMatcher = React.useMemo<
+    (DateBefore | DateAfter)[] | undefined
+  >(() => {
+    const matchers: (DateBefore | DateAfter)[] = [];
+    const beforeDate = minDate ? toDate(minDate) : undefined;
+    const afterDate = maxDate ? toDate(maxDate) : undefined;
+    if (beforeDate) matchers.push({ before: beforeDate });
+    if (afterDate) matchers.push({ after: afterDate });
+    return matchers.length > 0 ? matchers : undefined;
+  }, [minDate, maxDate]);
 
   const triggerContent = date ? (
     format(date, DISPLAY_FORMAT)
@@ -129,7 +133,7 @@ export function DatePicker({
               defaultMonth={tempDate ?? date}
               captionLayout="dropdown"
               startMonth={new Date(new Date().getFullYear() - 2, 0, 1)}
-              endMonth={new Date()}
+              endMonth={new Date(new Date().getFullYear() + 1, 11, 31)}
               reverseYears
               disabled={disabledMatcher}
               showOutsideDays={false}
