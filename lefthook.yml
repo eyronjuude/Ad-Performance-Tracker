@@ -2,7 +2,7 @@
 # Fix jobs (prettier, ruff) run first; verify jobs match CI exactly.
 # Cursor beforeShellExecution (bun vs npm, venv) has no pre-commit analogue — we run fixed commands (bunx, run_ruff.sh).
 pre-commit:
-  parallel: false  # Run fix then verify in order (CI runs sequentially)
+  piped: true  # Run sequentially, abort on first failure
   jobs:
     # Cursor: beforeReadFile (security) — no-exposed-secrets
     - name: no-secret-files
