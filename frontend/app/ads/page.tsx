@@ -9,7 +9,10 @@ import {
   aggregatePerformance,
   type PerformanceRow,
 } from "@/lib/api";
-import { formatDateForDisplay } from "@/lib/date-utils";
+import {
+  PROBATIONARY_SECTION_DESCRIPTION,
+  TENURED_SECTION_DESCRIPTION,
+} from "@/lib/config";
 import { useSettings } from "@/components/SettingsProvider";
 import { AdsTable } from "@/components/AdsTable";
 import { AdsTableSkeleton } from "@/components/AdsTableSkeleton";
@@ -74,6 +77,13 @@ function AdsPageContent() {
     () => settings.employees.find((e) => e.acronym === acronym),
     [settings.employees, acronym]
   );
+
+  const employeeStatus =
+    employee?.status ?? (isProbationary ? "probationary" : "tenured");
+  const sectionDescription =
+    employeeStatus === "probationary"
+      ? PROBATIONARY_SECTION_DESCRIPTION
+      : TENURED_SECTION_DESCRIPTION;
 
   const [rows, setRows] = useState<PerformanceRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -147,18 +157,11 @@ function AdsPageContent() {
             </svg>
             Back to Dashboard
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
-              {employee?.name ?? acronym}
-            </h1>
-            <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold tracking-wide text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-              {acronym}
-            </span>
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+            {employee?.name ?? acronym}
+          </h1>
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            {isProbationary && startDate && endDate
-              ? `Ad performance from ${formatDateForDisplay(startDate)} to ${formatDateForDisplay(endDate)}`
-              : "P1 ad performance details from BigQuery"}
+            {sectionDescription}
           </p>
         </header>
 
@@ -186,7 +189,7 @@ function AdsPageContent() {
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-900/50 dark:bg-red-950/30">
             <div className="flex items-start gap-3">
               <svg
-                className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500"
+                className="mt-0.5 h-5 w-5 shrink-0 text-red-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

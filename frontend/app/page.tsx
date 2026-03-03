@@ -10,6 +10,10 @@ import {
   fetchPerformanceSummaryByDate,
   type EmployeeAggregates,
 } from "@/lib/api";
+import {
+  PROBATIONARY_SECTION_DESCRIPTION,
+  TENURED_SECTION_DESCRIPTION,
+} from "@/lib/config";
 
 interface EmployeeState {
   aggregates: EmployeeAggregates | null;
@@ -213,7 +217,7 @@ export default function Home() {
               Tenured Employees
             </h2>
             <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              P1 ads grouped by employee acronym.
+              {TENURED_SECTION_DESCRIPTION}
             </p>
             <EmployeeTable
               employees={tenuredEmployees}
@@ -231,7 +235,7 @@ export default function Home() {
               Probationary Employees
             </h2>
             <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              Grouped by employee acronym and probation date range.
+              {PROBATIONARY_SECTION_DESCRIPTION}
             </p>
             <ProbationaryEmployeeTable
               employees={probationaryEmployees}

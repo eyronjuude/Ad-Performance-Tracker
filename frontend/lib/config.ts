@@ -85,3 +85,12 @@ export const CROAS_EVALUATION_KEY: CroasThreshold[] = [
  * Rows with spend >= threshold are "eligible"; below threshold are "not eligible".
  */
 export const BONUS_ELIGIBILITY_THRESHOLD = 50_000;
+
+/**
+ * Section description text for Tenured and Probationary employees.
+ * Shown on the Dashboard and on the View Phase Ads page (below employee name).
+ */
+export const TENURED_SECTION_DESCRIPTION =
+  "P1 ads grouped by employee acronym.";
+export const PROBATIONARY_SECTION_DESCRIPTION =
+  "Grouped by employee acronym and probation date range.";
