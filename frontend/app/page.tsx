@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
 import { EmployeeTable } from "@/components/EmployeeTable";
 import { ProbationaryEmployeeTable } from "@/components/ProbationaryEmployeeTable";
+import { ProbationaryEmployeeComparisonTable } from "@/components/ProbationaryEmployeeComparisonTable";
+import { TenuredEmployeeComparisonTable } from "@/components/TenuredEmployeeComparisonTable";
 import { useSettings } from "@/components/SettingsProvider";
 import {
   fetchPerformanceSummary,
@@ -226,6 +228,15 @@ export default function Home() {
               croasEvaluationKey={settings.croasEvaluationKey}
               state={tenuredState}
             />
+            <h2 className="mt-12 mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Tenured Employee Comparison
+            </h2>
+            <TenuredEmployeeComparisonTable
+              employees={tenuredEmployees}
+              spendEvaluationKey={settings.spendEvaluationKey}
+              croasEvaluationKey={settings.croasEvaluationKey}
+              state={tenuredState}
+            />
           </section>
         )}
 
@@ -238,6 +249,15 @@ export default function Home() {
               {PROBATIONARY_SECTION_DESCRIPTION}
             </p>
             <ProbationaryEmployeeTable
+              employees={probationaryEmployees}
+              spendEvaluationKey={settings.spendEvaluationKey}
+              croasEvaluationKey={settings.croasEvaluationKey}
+              state={probationaryState}
+            />
+            <h2 className="mt-12 mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Probationary Employee Comparison
+            </h2>
+            <ProbationaryEmployeeComparisonTable
               employees={probationaryEmployees}
               spendEvaluationKey={settings.spendEvaluationKey}
               croasEvaluationKey={settings.croasEvaluationKey}

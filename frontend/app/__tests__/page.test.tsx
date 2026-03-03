@@ -144,6 +144,96 @@ describe("Home page (dashboard)", () => {
     expect(screen.getByText("June 1, 2026")).toBeInTheDocument();
   });
 
+  it("renders Tenured Employee Comparison section with Phase One accordion", async () => {
+    renderWithProvider(<Home />);
+    expect(
+      await screen.findByRole("heading", {
+        name: /Tenured Employee Comparison/i,
+      })
+    ).toBeInTheDocument();
+    const phaseOneButton = screen.getByRole("button", { name: /Phase One/i });
+    expect(phaseOneButton).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("expands Tenured Employee Comparison table on Phase One click", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<Home />);
+
+    const phaseOneButton = await screen.findByRole("button", {
+      name: /Phase One/i,
+    });
+    await user.click(phaseOneButton);
+
+    expect(phaseOneButton).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("columnheader", { name: /^Employee$/i })
+    ).toBeInTheDocument();
+    const viewPhaseLinks = screen.getAllByRole("link", {
+      name: /View Phase Ads/i,
+    });
+    expect(viewPhaseLinks).toHaveLength(3);
+  });
+
+  it("renders Probationary Employee Comparison with Employee Name column", async () => {
+    const settings = getDefaultSettings();
+    settings.employees.push({
+      acronym: "PRB",
+      name: "Employee PRB",
+      status: "probationary",
+      startDate: "2026-01-01",
+      reviewDate: "2026-06-01",
+    });
+    vi.mocked(fetchSettings).mockResolvedValue(settings);
+
+    renderWithProvider(<Home />);
+    expect(
+      await screen.findByRole("heading", {
+        name: /Probationary Employee Comparison/i,
+      })
+    ).toBeInTheDocument();
+
+    const phaseOneButtons = screen.getAllByRole("button", {
+      name: /Phase One/i,
+    });
+    const probationaryPhaseOne = phaseOneButtons.find(
+      (btn) =>
+        btn.getAttribute("aria-controls") ===
+        "probationary-comparison-phase-one-panel"
+    );
+    expect(probationaryPhaseOne).toBeDefined();
+  });
+
+  it("Probationary Employee Comparison table has Employee Name column when expanded", async () => {
+    const user = userEvent.setup();
+    const settings = getDefaultSettings();
+    settings.employees.push({
+      acronym: "PRB",
+      name: "Employee PRB",
+      status: "probationary",
+      startDate: "2026-01-01",
+      reviewDate: "2026-06-01",
+    });
+    vi.mocked(fetchSettings).mockResolvedValue(settings);
+
+    renderWithProvider(<Home />);
+    const phaseOneButtons = await screen.findAllByRole("button", {
+      name: /Phase One/i,
+    });
+    const probationaryPhaseOne = phaseOneButtons.find(
+      (btn) =>
+        btn.getAttribute("aria-controls") ===
+        "probationary-comparison-phase-one-panel"
+    );
+    expect(probationaryPhaseOne).toBeDefined();
+    await user.click(probationaryPhaseOne!);
+
+    expect(screen.getByText("Employee Name")).toBeInTheDocument();
+    const viewPhaseLinks = screen.getAllByRole("link", {
+      name: /View Phase Ads/i,
+    });
+    expect(viewPhaseLinks).toHaveLength(1);
+  });
+
   it("shows skeleton while settings are loading", () => {
     vi.mocked(fetchSettings).mockReturnValue(new Promise(() => {}));
 

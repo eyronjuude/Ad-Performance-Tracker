@@ -13,7 +13,7 @@ bun dev
 
 ## Pages
 
-- **/** -- Ad Performance Dashboard with separate Tenured and Probationary employee sections
+- **/** -- Ad Performance Dashboard with Tenured and Probationary employee sections, plus Tenured Employee Comparison and Probationary Employee Comparison (Phase One accordion, one row per employee)
 - **/settings** -- Configure employee name/acronym mapping, tenured/probationary status with start/review dates, Spend (AUD) and cROAS evaluation thresholds. Changes require clicking Save; navigating away with unsaved changes shows a confirmation dialog.
 - **/dashboard** -- Redirects to /
 - **/ads** -- Ads detail page (P1 filter for tenured, date-range filter for probationary). Table columns: #, Ad Name, Spend (AUD), cROAS, Bonus eligibility.
