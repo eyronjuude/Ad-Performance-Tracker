@@ -35,13 +35,16 @@ describe("Settings page", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders spend and cROAS evaluation sections", async () => {
+  it("renders spend, cROAS, and bonus eligibility sections", async () => {
     renderWithProvider(<SettingsPage />);
     expect(
       await screen.findByText(/Spend evaluation thresholds/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/cROAS evaluation thresholds/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Bonus eligibility threshold/i)
     ).toBeInTheDocument();
   });
 
@@ -77,6 +80,26 @@ describe("Settings page", () => {
       /Three intervals \(Red, Yellow, Green\)/i
     );
     expect(descriptions).toHaveLength(2);
+  });
+
+  it("renders bonus eligibility threshold input with default value", async () => {
+    renderWithProvider(<SettingsPage />);
+    const input = await screen.findByLabelText(
+      /Bonus eligibility threshold \(AUD\)/i
+    );
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveValue("$50,000");
+  });
+
+  it("accepts changes to bonus eligibility threshold", async () => {
+    const user = userEvent.setup();
+    renderWithProvider(<SettingsPage />);
+    const input = await screen.findByLabelText(
+      /Bonus eligibility threshold \(AUD\)/i
+    );
+    await user.clear(input);
+    await user.type(input, "75000");
+    expect(input).toHaveValue("$75,000");
   });
 
   it("renders employee status selectors defaulting to Tenured", async () => {

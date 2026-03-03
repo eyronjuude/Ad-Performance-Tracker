@@ -79,3 +79,9 @@ export const CROAS_EVALUATION_KEY: CroasThreshold[] = [
   { min: 1, max: 3, color: "yellow" },
   { min: 0, max: 1, color: "red" },
 ];
+
+/**
+ * Bonus eligibility: per-row spend threshold (AUD).
+ * Rows with spend >= threshold are "eligible"; below threshold are "not eligible".
+ */
+export const BONUS_ELIGIBILITY_THRESHOLD = 50_000;

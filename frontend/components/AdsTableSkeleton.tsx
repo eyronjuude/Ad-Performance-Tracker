@@ -2,7 +2,7 @@
 
 import { Skeleton } from "./Skeleton";
 
-/** Loading skeleton matching AdsTable layout: search bar + 4-col table (#, Ad Name, Spend, cROAS) */
+/** Loading skeleton matching AdsTable layout: search bar + 5-col table (#, Ad Name, Spend, cROAS, Bonus eligibility) */
 export function AdsTableSkeleton() {
   return (
     <div data-testid="ads-table-skeleton">
@@ -21,13 +21,15 @@ export function AdsTableSkeleton() {
               <th className="w-8 px-4 py-3 text-left">
                 <Skeleton className="h-4 w-4" />
               </th>
-              {["Ad Name", "Spend", "cROAS"].map((_, i) => (
-                <th key={i} className="px-4 py-3">
-                  <Skeleton
-                    className={`h-4 ${i === 0 ? "w-24" : i === 1 ? "w-20" : "w-12"}`}
-                  />
-                </th>
-              ))}
+              {["Ad Name", "Spend", "cROAS", "Bonus eligibility"].map(
+                (_, i) => (
+                  <th key={i} className="px-4 py-3">
+                    <Skeleton
+                      className={`h-4 ${i === 0 ? "w-24" : i === 1 ? "w-20" : i === 2 ? "w-12" : "w-24"}`}
+                    />
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -47,6 +49,9 @@ export function AdsTableSkeleton() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Skeleton className="inline-block h-4 w-12" />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Skeleton className="inline-block h-4 w-3 rounded-full" />
                 </td>
               </tr>
             ))}

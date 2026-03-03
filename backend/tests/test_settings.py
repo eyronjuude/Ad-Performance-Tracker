@@ -35,7 +35,9 @@ def test_get_settings_returns_defaults_when_empty(client):
     assert "spendEvaluationKey" in data
     assert "croasEvaluationKey" in data
     assert "periods" in data
+    assert "bonusEligibilityThreshold" in data
     assert data["periods"] == ["P1"]
+    assert data["bonusEligibilityThreshold"] == 50000
     for emp in data["employees"]:
         assert emp["status"] == "tenured"
         assert emp["startDate"] is None
@@ -48,6 +50,7 @@ def test_put_and_get_settings(client):
         "spendEvaluationKey": [{"min": 1000, "max": None, "color": "green"}],
         "croasEvaluationKey": [{"min": 2, "max": None, "color": "green"}],
         "periods": ["P1", "P2"],
+        "bonusEligibilityThreshold": 75000,
     }
     resp = client.put("/api/settings", json=settings)
     assert resp.status_code == 200

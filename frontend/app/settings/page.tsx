@@ -376,6 +376,43 @@ function SpendEvaluationSection() {
   );
 }
 
+function BonusEligibilitySection() {
+  const { settings, setSettings } = useSettings();
+
+  const displayValue = formatCurrency(settings.bonusEligibilityThreshold);
+
+  const handleChange = (raw: string) => {
+    const n = parseCurrency(raw);
+    setSettings((prev) => ({
+      ...prev,
+      bonusEligibilityThreshold: n ?? 0,
+    }));
+  };
+
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+        Bonus eligibility threshold (AUD)
+      </h2>
+      <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+        Ads with spend ≥ this amount show as eligible in the Bonus eligibility
+        column on the View Phase Ads page.
+      </p>
+      <div>
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="Threshold"
+          value={displayValue}
+          onChange={(e) => handleChange(e.target.value)}
+          className="w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-50"
+          aria-label="Bonus eligibility threshold (AUD)"
+        />
+      </div>
+    </section>
+  );
+}
+
 function CroasEvaluationSection() {
   const { settings, setSettings } = useSettings();
   const thresholds = getThreeCroasThresholds(settings.croasEvaluationKey);
@@ -473,6 +510,7 @@ export default function SettingsPage() {
         <EmployeeMappingSection />
         <SpendEvaluationSection />
         <CroasEvaluationSection />
+        <BonusEligibilitySection />
       </div>
     </div>
   );

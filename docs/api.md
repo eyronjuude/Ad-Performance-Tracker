@@ -135,6 +135,7 @@ Returns the current app settings.
 | `spendEvaluationKey` | array | `{min, max, color}` thresholds for spend (AUD) |
 | `croasEvaluationKey` | array | `{min, max, color}` thresholds for cROAS |
 | `periods` | array | Period labels (e.g. `["P1", "P2"]`) |
+| `bonusEligibilityThreshold` | number | Spend (AUD) threshold for bonus eligibility column; ads with spend ≥ this show as eligible |
 
 Each employee object:
 
@@ -156,7 +157,7 @@ If no settings exist, returns defaults (all employees tenured).
 
 Replaces stored settings with the request body.
 
-**Request body:** Same shape as `GET` response (employees, spendEvaluationKey, croasEvaluationKey, periods).
+**Request body:** Same shape as `GET` response (employees, spendEvaluationKey, croasEvaluationKey, periods, bonusEligibilityThreshold).
 
 **Response:** `200 OK` — The saved settings.
 

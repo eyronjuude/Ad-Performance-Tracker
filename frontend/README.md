@@ -16,7 +16,7 @@ bun dev
 - **/** -- Ad Performance Dashboard with separate Tenured and Probationary employee sections
 - **/settings** -- Configure employee name/acronym mapping, tenured/probationary status with start/review dates, Spend (AUD) and cROAS evaluation thresholds. Changes require clicking Save; navigating away with unsaved changes shows a confirmation dialog.
 - **/dashboard** -- Redirects to /
-- **/ads** -- Ads detail page (P1 filter for tenured, date-range filter for probationary)
+- **/ads** -- Ads detail page (P1 filter for tenured, date-range filter for probationary). Table columns: #, Ad Name, Spend (AUD), cROAS, Bonus eligibility.
 
 ## Loading States
 
@@ -30,6 +30,7 @@ The app includes a sidebar for navigation between Dashboard and Settings. Settin
 
 - **Employees**: Configure in Settings page or edit `lib/config.ts` (`EMPLOYEES`) for defaults.
 - **Evaluation keys**: Configure in Settings page or edit `lib/config.ts` (`SPEND_EVALUATION_KEY`, `CROAS_EVALUATION_KEY`).
+- **Bonus eligibility**: Configurable in Settings page (Bonus eligibility threshold). Default $50,000 AUD. Rows with spend ≥ threshold show eligible; below threshold show not eligible.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

@@ -34,7 +34,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="text-xs font-medium tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
+      <p className="text-xs font-medium tracking-wider text-zinc-500 dark:text-zinc-400">
         {label}
       </p>
       <p className="mt-1 text-2xl font-semibold text-zinc-900 tabular-nums dark:text-zinc-50">
@@ -151,7 +151,7 @@ function AdsPageContent() {
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
               {employee?.name ?? acronym}
             </h1>
-            <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold tracking-wide text-zinc-600 uppercase dark:bg-zinc-700 dark:text-zinc-300">
+            <span className="rounded-md bg-zinc-200 px-2 py-0.5 text-xs font-semibold tracking-wide text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
               {acronym}
             </span>
           </div>
@@ -220,7 +220,12 @@ function AdsPageContent() {
         {isLoading && <AdsTableSkeleton />}
 
         {/* Ads table */}
-        {!isLoading && !error && <AdsTable rows={rows} />}
+        {!isLoading && !error && (
+          <AdsTable
+            rows={rows}
+            bonusEligibilityThreshold={settings.bonusEligibilityThreshold}
+          />
+        )}
       </div>
     </div>
   );

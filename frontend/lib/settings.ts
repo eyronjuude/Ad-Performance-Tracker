@@ -5,6 +5,7 @@
 
 import type { CroasThreshold, Employee, SpendThreshold } from "@/lib/config";
 import {
+  BONUS_ELIGIBILITY_THRESHOLD,
   CROAS_EVALUATION_KEY,
   EMPLOYEES,
   PERIODS,
@@ -16,6 +17,7 @@ export interface Settings {
   spendEvaluationKey: SpendThreshold[];
   croasEvaluationKey: CroasThreshold[];
   periods: readonly string[];
+  bonusEligibilityThreshold: number;
 }
 
 /** Default settings. Use for SSR and initial client render before API load. */
@@ -25,5 +27,6 @@ export function getDefaultSettings(): Settings {
     spendEvaluationKey: JSON.parse(JSON.stringify(SPEND_EVALUATION_KEY)),
     croasEvaluationKey: JSON.parse(JSON.stringify(CROAS_EVALUATION_KEY)),
     periods: [...PERIODS],
+    bonusEligibilityThreshold: BONUS_ELIGIBILITY_THRESHOLD,
   };
 }

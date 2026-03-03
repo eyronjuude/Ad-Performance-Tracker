@@ -56,6 +56,8 @@ function normalizeEmployeeStatus(value: unknown): EmployeeStatus {
   return value === "probationary" ? "probationary" : "tenured";
 }
 
+const BONUS_THRESHOLD_DEFAULT = 50_000;
+
 /** Map backend camelCase to our Settings shape. Always exactly 3 thresholds (Red, Yellow, Green). */
 function normalizeSettings(raw: Record<string, unknown>): Settings {
   return {
@@ -87,6 +89,11 @@ function normalizeSettings(raw: Record<string, unknown>): Settings {
     periods: Array.isArray(raw.periods)
       ? (raw.periods as string[]).map(String)
       : [],
+    bonusEligibilityThreshold:
+      typeof raw.bonusEligibilityThreshold === "number" &&
+      raw.bonusEligibilityThreshold >= 0
+        ? raw.bonusEligibilityThreshold
+        : BONUS_THRESHOLD_DEFAULT,
   };
 }
 
@@ -107,6 +114,7 @@ export async function saveSettingsApi(settings: Settings): Promise<Settings> {
     spendEvaluationKey: settings.spendEvaluationKey,
     croasEvaluationKey: settings.croasEvaluationKey,
     periods: settings.periods,
+    bonusEligibilityThreshold: settings.bonusEligibilityThreshold,
   };
   const res = await fetch(`${API_BASE}/api/settings`, {
     method: "PUT",

@@ -60,6 +60,7 @@ def _default_settings() -> dict[str, Any]:
             {"min": 0, "max": 1, "color": "red"},
         ],
         "periods": ["P1"],
+        "bonusEligibilityThreshold": 50000,
     }
 
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { PerformanceRow } from "@/lib/api";
+import { BONUS_ELIGIBILITY_THRESHOLD } from "@/lib/config";
 
 type SortField = "ad_name" | "spend" | "croas";
 type SortDir = "asc" | "desc";
@@ -18,6 +19,30 @@ function formatSpendAud(value: number): string {
 function formatCroas(value: number | null): string {
   if (value == null) return "—";
   return value.toFixed(2);
+}
+
+function BonusEligibilityIndicator({
+  spend,
+  threshold,
+}: {
+  spend: number;
+  threshold: number;
+}) {
+  const eligible = spend >= threshold;
+  return (
+    <span
+      role="img"
+      aria-label={eligible ? "Eligible" : "Not eligible"}
+      title={
+        eligible
+          ? "Eligible (spend ≥ threshold)"
+          : "Not eligible (spend < threshold)"
+      }
+      className={`inline-flex h-3 w-3 shrink-0 rounded-full ${
+        eligible ? "bg-red-500" : "bg-zinc-300 dark:bg-zinc-600"
+      }`}
+    />
+  );
 }
 
 function SortIcon({
@@ -71,9 +96,14 @@ function SortIcon({
 
 interface AdsTableProps {
   rows: PerformanceRow[];
+  /** Override from Settings; falls back to config default when omitted. */
+  bonusEligibilityThreshold?: number;
 }
 
-export function AdsTable({ rows }: AdsTableProps) {
+export function AdsTable({
+  rows,
+  bonusEligibilityThreshold = BONUS_ELIGIBILITY_THRESHOLD,
+}: AdsTableProps) {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("spend");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -185,13 +215,16 @@ export function AdsTable({ rows }: AdsTableProps) {
                   direction={sortDir}
                 />
               </th>
+              <th className="px-4 py-3 text-right font-medium text-zinc-600 dark:text-zinc-400">
+                Bonus eligibility
+              </th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400"
                 >
                   {search
@@ -219,6 +252,12 @@ export function AdsTable({ rows }: AdsTableProps) {
                   </td>
                   <td className="px-4 py-3 text-right text-zinc-900 tabular-nums dark:text-zinc-50">
                     {formatCroas(row.croas)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <BonusEligibilityIndicator
+                      spend={row.spend}
+                      threshold={bonusEligibilityThreshold}
+                    />
                   </td>
                 </tr>
               ))
