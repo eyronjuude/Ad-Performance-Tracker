@@ -31,6 +31,14 @@ Maintain linear Git history and enforce project commit standards. Align with `.c
 4. **Commit**: Conventional format, ≤50 chars subject, body ≤72/line, Co-authored-by footer. Run from terminal so Lefthook runs.
 5. **Return**: Git Bash here-doc command with `&&`. User pastes as-is.
 
+## When the Agent Runs the Commit
+
+See rule **agent-git-commit-shell**. The agent must:
+- Write the message to `scripts/_commit_msg.txt` (gitignored)
+- Run `bash -c "git add . && git commit -F scripts/_commit_msg.txt"` (Git Bash)
+- Run in **foreground** (not background) so the user can enter SSH passphrase if prompted
+- Delete `scripts/_commit_msg.txt` after
+
 ## Commit Message Formatting (Git Bash here-doc)
 
 Use a **here-doc** piped to `git commit -F -`. Works in Git Bash, Bash, WSL. No escape sequences; natural multi-line formatting. The closing `EOF` must be at the start of its line.

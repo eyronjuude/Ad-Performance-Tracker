@@ -1,0 +1,26 @@
+---
+description: Agent uses Git Bash and temp file when running git commit
+alwaysApply: true
+---
+
+# Agent Git Commit Shell
+
+When the agent performs a `git commit`, it must use **Git Bash** and a temp file so the command works reliably and the user can enter an SSH/GPG passphrase if prompted.
+
+## Workflow
+
+1. **Write message to temp file**: Create `scripts/_commit_msg.txt` with the full commit message (subject, blank line, body, blank line, Co-authored-by footer). The `scripts/` folder is gitignored.
+
+2. **Stage and commit via Git Bash**: Run:
+   ```bash
+   bash -c "git add . && git commit -F scripts/_commit_msg.txt"
+   ```
+   Use `bash` (Git Bash); if not in PATH, use `\"C:\\Program Files\\Git\\bin\\bash.exe\" -c \"...\"`.
+
+3. **Run in foreground**: Do **not** run the commit in background. The user may be prompted for an SSH key passphrase; they must be able to type in the terminal. Use `is_background: false` (or equivalent) so the terminal stays interactive.
+
+4. **Delete temp file**: Remove `scripts/_commit_msg.txt` after the commit (success or failure).
+
+## Passphrase
+
+If commit signing is configured, git prompts `Enter passphrase:` for the SSH key. The agent cannot enter it. Run the commit in the **foreground** so the terminal stays interactive. **Tell the user**: "When you see 'Enter passphrase:' in the terminal, type your SSH key passphrase and press Enter." The user must focus the terminal and respond; there is no way for the agent to supply the passphrase automatically.

@@ -15,4 +15,4 @@
    - **Co-authored-by**: Add `Co-authored-by: Model Name <model@example.com>` in the footer for every AI model involved. For Composer: `Co-authored-by: Composer <noreply@cursor.com>`.
    - **Here-doc (Git Bash)**: Use `git commit -F - <<'EOF'` with the message, then `EOF`. Works in Git Bash, Bash, WSL. Closing `EOF` at line start.
 7. Verify that the commit author in the logs (`git log`) matches the user's configured Git identity for this repository.
-8. Return the commit command to be run in Git Bash. Use here-doc format so the user can paste as-is.
+8. **When the agent runs the commit**: Use the temp-file workflow (rule: agent-git-commit-shell). Write message to `scripts/_commit_msg.txt`, run `git add . && git commit -F scripts/_commit_msg.txt` in **foreground**, delete the file after. If commit signing is enabled, tell the user: "When you see 'Enter passphrase:' in the terminal, type your SSH key passphrase and press Enter." **When returning a command for the user**: Use here-doc format so they can paste into Git Bash.

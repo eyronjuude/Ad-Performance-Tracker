@@ -37,7 +37,7 @@ Keep history linear—avoid merge commits when possible.
 3. **Stage**: `git add .` or selective `git add <paths>`
 4. **Write message**: Conventional format, ≤50 chars subject, body ≤72 chars/line, Co-authored-by footer
 5. **Commit**: Run from terminal so Lefthook (pre-commit) runs format/lint
-6. **Return command**: Git Bash here-doc format; user pastes as-is
+6. **When agent runs commit**: Use temp file + Git Bash (rule: agent-git-commit-shell). Run in foreground so user can enter passphrase. **When returning for user**: Git Bash here-doc format for paste
 
 ## Commit Message Formatting (Git Bash here-doc)
 
