@@ -62,7 +62,8 @@ Do **not** edit `docs/openapi.json` by hand.
 | Area | Path | Notes |
 |------|------|-------|
 | API routers | `backend/routers/*.py` | Source of truth for endpoints |
-| OpenAPI generator | `backend/scripts/generate_openapi.py` | Run from `backend/` with venv active |
+| Pipeline scripts | `frontend/scripts/`, `backend/scripts/` | Essential scripts only; root `scripts/` is gitignored for agent temp scripts |
+| OpenAPI generator | `backend/scripts/generate_openapi.py` | Run from `backend/` with `python scripts/generate_openapi.py` (venv active) |
 | Backend venv | `.venv` or `venv` | Activate before running Python scripts |
 
 ## Report format

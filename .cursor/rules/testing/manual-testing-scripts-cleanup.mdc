@@ -1,34 +1,39 @@
 ---
-description: Remove temporary scripts created for manual testing after execution completes
+description: Store temporary manual-testing scripts in root scripts/ (gitignored); delete after execution completes
 alwaysApply: true
 ---
 
 # Manual Testing Scripts Cleanup
 
-When the user asks for **manual testing** and the agent creates new scripts (e.g., shell scripts, one-off Python/Node scripts) to perform that testing, **delete those scripts as soon as execution completes**.
+When the user asks for **manual testing** and the agent creates new scripts (e.g., shell scripts, one-off Python/Node scripts) to perform that testing:
+
+1. **Store** the script in root `scripts/` (gitignored—see essential-pipeline-scripts-only rule).
+2. **Run** the script and capture the result.
+3. **Delete** the script as soon as execution completes (success or failure).
 
 ## Guidelines
 
+- **Location**: Root `scripts/` is gitignored; use it for temporary scripts so they never enter version control.
 - **Scope**: Applies only to scripts the agent creates specifically to run manual tests—not to existing project test scripts or fixtures.
-- **Timing**: Remove the script immediately after it has finished running (success or failure).
-- **Do not leave**: Avoid leaving temporary or throwaway scripts in the repo once the manual test is done.
+- **Timing**: Remove the script immediately after it has finished running.
+- **Do not leave**: Avoid leaving temporary manual-testing scripts in the repo once the manual test is done.
 
 ## Examples
 
 ```
 <!-- User: "Can you do some manual testing on the campaigns API?" -->
-<!-- Agent creates scripts/test_campaigns_manual.sh, runs it, verifies output -->
+<!-- Agent creates scripts/test_campaigns_manual.sh in root scripts/ (gitignored), runs it, verifies output -->
 <!-- Agent deletes scripts/test_campaigns_manual.sh before responding -->
 ```
 
 ```
 <!-- User: "Manually test the health endpoint" -->
-<!-- Agent creates scripts/check_health.py, runs it -->
+<!-- Agent creates scripts/check_health.py in root scripts/, runs it -->
 <!-- Agent deletes scripts/check_health.py immediately after -->
 ```
 
 ## Checklist
 
-1. Created a script for manual testing? → Note its path.
+1. Created a script for manual testing? → Put it in root `scripts/` (gitignored).
 2. Script execution finished? → Delete the script.
 3. Report results to user without leaving the script behind.

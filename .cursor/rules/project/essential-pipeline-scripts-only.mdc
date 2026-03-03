@@ -1,0 +1,44 @@
+---
+description: Root scripts/ is gitignored for agent temp scripts; frontend/scripts and backend/scripts hold essential pipeline scripts
+alwaysApply: true
+---
+
+# Essential Pipeline Scripts Only
+
+Script layout:
+
+- **`scripts/`** (repo root) — **Gitignored.** Agents store temporary scripts here for task automations. Do not commit.
+- **`frontend/scripts/`** — Essential frontend pipeline scripts (CI, Lefthook, workflows). Committed.
+- **`backend/scripts/`** — Essential backend pipeline scripts (CI, Lefthook, OpenAPI, workflows). Committed.
+
+## Essential Scripts (do not remove)
+
+| Script | Used by | Purpose |
+|--------|---------|---------|
+| `backend/scripts/check_no_secret_files.sh` | Lefthook (no-secret-files) | Fail commit if `.env` / `.env.local` (or other secret env files) are staged |
+| `backend/scripts/run_ruff.sh` | Lefthook (ruff-format, ruff-lint, ruff-backend) | Run Ruff from backend venv (Windows/Unix path handling) |
+| `backend/scripts/generate_openapi.py` | Project rules, docs | Regenerate `docs/openapi.json` when API endpoints change |
+
+## Guidelines
+
+- **Agent temp scripts**: Place in root `scripts/` (gitignored). Delete manual-testing scripts after execution; other automations may persist there.
+- **Pipeline scripts**: Add to `frontend/scripts/` or `backend/scripts/` only when required by `lefthook.yml`, CI (`.github/workflows/`), or project rules.
+- **One-off or personal helpers**: Use root `scripts/` (gitignored) or keep locally; do not add to `frontend/scripts/` or `backend/scripts/`.
+
+## Examples
+
+```markdown
+<!-- ❌ BAD - Pipeline script in gitignored root -->
+Added scripts/run_ruff.sh (root scripts/ is gitignored; pipeline scripts belong in backend/scripts/).
+```
+
+```markdown
+<!-- ✅ GOOD - Agent temp script in root (gitignored) -->
+Created scripts/one-off-migration.py for task; deleted after run.
+```
+
+## Checklist
+
+1. Adding a pipeline script? → Put in `frontend/scripts/` or `backend/scripts/`; confirm it is called by Lefthook, CI, or a project rule.
+2. One-off or temp script? → Use root `scripts/` (gitignored); delete if manual-testing per manual-testing-scripts-cleanup rule.
+3. Script no longer used by pipeline? → Remove from `frontend/scripts/` or `backend/scripts/`.

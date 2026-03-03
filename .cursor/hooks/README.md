@@ -8,16 +8,16 @@ The project uses **Lefthook** for Git pre-commit; config: `lefthook.yml`. These 
 
 | Job               | Scope / glob                               | Command / behavior |
 |-------------------|--------------------------------------------|--------------------|
-| **no-secret-files** | (all commits)                            | `sh scripts/check_no_secret_files.sh` — fail if `.env` / `.env.local` (or other secret env files) are staged; allows `.env.example`. From Cursor **beforeReadFile (security)**. |
+| **no-secret-files** | (all commits)                            | `sh backend/scripts/check_no_secret_files.sh` — fail if `.env` / `.env.local` (or other secret env files) are staged; allows `.env.example`. From Cursor **beforeReadFile (security)**. |
 | **prettier**      | `frontend/**/*.{ts,tsx,js,jsx,mjs,json,css,md}` | `bunx prettier --write {staged_files}` (stage_fixed) |
-| **ruff-format**   | `backend/**/*.py`                         | `sh scripts/run_ruff.sh format {staged_files}` (stage_fixed) |
-| **ruff-lint**     | `backend/**/*.py`                         | `sh scripts/run_ruff.sh check --fix {staged_files}` (stage_fixed) |
+| **ruff-format**   | `backend/**/*.py`                         | `sh backend/scripts/run_ruff.sh format {staged_files}` (stage_fixed) |
+| **ruff-lint**     | `backend/**/*.py`                         | `sh backend/scripts/run_ruff.sh check --fix {staged_files}` (stage_fixed) |
 | **format-check**  | (all commits)                             | `bun run format:check` — mirrors CI Prettier check |
 | **lint**          | (all commits)                             | `bun run lint` — mirrors CI ESLint |
 | **typecheck**     | (all commits)                             | `bun run tsc --noEmit` — mirrors CI type-check |
 | **test**          | (all commits)                             | `bun run test` — mirrors CI Vitest |
 | **build**         | (all commits)                             | `bun run build` — mirrors CI Next.js build |
-| **ruff-backend**  | (all commits)                             | `ruff format --check backend/ && ruff check backend/` — mirrors CI backend checks |
+| **ruff-backend**  | (all commits)                             | `sh backend/scripts/run_ruff.sh format --check backend/ && sh backend/scripts/run_ruff.sh check backend/` — mirrors CI backend checks |
 
 **Cursor → Lefthook**: The **security** rule (no-exposed-secrets) is enforced in Cursor by `before-read-file-security.js` (beforeReadFile) and in Git by the **no-secret-files** pre-commit job. The **style** checks are applied in Cursor by `after-file-edit-style.js` (afterFileEdit) and in Git by prettier + ruff-format + ruff-lint. The **project** rules (use bun, venv) are Cursor-only; pre-commit runs fixed commands (bunx, run_ruff.sh) so there is no matching lefthook job.
 

@@ -34,6 +34,9 @@ Thumbs.db
 # Commit message fix workflow
 subject-suggestions.json
 
+# Agent temporary scripts (root /scripts only; frontend/scripts and backend/scripts are committed)
+/scripts/
+
 # Logs & debug
 *.log
 npm-debug.log*

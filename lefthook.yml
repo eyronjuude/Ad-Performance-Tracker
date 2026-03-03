@@ -6,7 +6,7 @@ pre-commit:
   jobs:
     # Cursor: beforeReadFile (security) — no-exposed-secrets
     - name: no-secret-files
-      run: sh scripts/check_no_secret_files.sh
+      run: sh backend/scripts/check_no_secret_files.sh
 
     # Fix staged files (before CI-style verify)
     - name: prettier
@@ -17,12 +17,12 @@ pre-commit:
 
     - name: ruff-format
       glob: "backend/**/*.py"
-      run: sh scripts/run_ruff.sh format {staged_files}
+      run: sh backend/scripts/run_ruff.sh format {staged_files}
       stage_fixed: true
 
     - name: ruff-lint
       glob: "backend/**/*.py"
-      run: sh scripts/run_ruff.sh check --fix {staged_files}
+      run: sh backend/scripts/run_ruff.sh check --fix {staged_files}
       stage_fixed: true
 
     # Mirror CI: format check, lint, ruff backend, typecheck, test, build
@@ -35,7 +35,7 @@ pre-commit:
       run: bun run lint
 
     - name: ruff-backend
-      run: sh scripts/run_ruff.sh format --check backend/ && sh scripts/run_ruff.sh check backend/
+      run: sh backend/scripts/run_ruff.sh format --check backend/ && sh backend/scripts/run_ruff.sh check backend/
 
     - name: typecheck
       root: "frontend/"
