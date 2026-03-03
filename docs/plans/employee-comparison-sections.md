@@ -2,7 +2,7 @@
 
 ## Summary
 
-Add two new dashboard sections: **Tenured Employee Comparison** and **Probationary Employee Comparison**. Each has a collapsible "Phase One" accordion with a single table comparing employees side-by-side (one row per employee). Phase Two to be added later.
+Add two new dashboard sections: **Tenured Employee Comparison** and **Probationary Employee Comparison**. Each has a collapsible "Phase 1" accordion with a single table comparing employees side-by-side (one row per employee). Phase Two to be added later.
 
 ## Current State
 
@@ -15,7 +15,7 @@ Add two new dashboard sections: **Tenured Employee Comparison** and **Probationa
 ### Tenured Employee Comparison
 
 - **Section**: Heading "Tenured Employee Comparison", description text (optional).
-- **Accordion**: Single collapsible "Phase One" (reuse existing expand/collapse pattern).
+- **Accordion**: Single collapsible "Phase 1" (reuse existing expand/collapse pattern).
 - **Table** (when expanded):
   - **Rows**: One per tenured employee.
   - **Columns**: Employee | Spend (AUD) | cROAS | Spend Evaluation | cROAS Evaluation | Ads.
@@ -24,7 +24,7 @@ Add two new dashboard sections: **Tenured Employee Comparison** and **Probationa
 ### Probationary Employee Comparison
 
 - **Section**: Heading "Probationary Employee Comparison".
-- **Accordion**: Single collapsible "Phase One".
+- **Accordion**: Single collapsible "Phase 1".
 - **Table** (when expanded):
   - **Rows**: One per probationary employee.
   - **Columns**: Employee Name | Start Date | Review Date | Spend (AUD) | cROAS | Spend Evaluation | cROAS Evaluation | Ads.
@@ -40,14 +40,14 @@ Add two new dashboard sections: **Tenured Employee Comparison** and **Probationa
 ### Frontend
 
 - [x] **TenuredEmployeeComparisonTable component** – New component:
-  - Collapsible "Phase One" header (same pattern as `EmployeeTable` chevron/expand).
+  - Collapsible "Phase 1" header (same pattern as `EmployeeTable` chevron/expand).
   - Single table: rows = employees, columns = Employee, Spend, cROAS, Spend Eval, cROAS Eval, Ads.
   - Reuse `formatSpendAud`, `formatCroas`, `getSpendEvaluationColor`, `getCroasEvaluationColor`, `DOT_COLORS`.
   - Props: `employees`, `spendEvaluationKey`, `croasEvaluationKey`, `state`.
   - View Phase Ads link: `/ads?employee_acronym={acronym}`.
 
 - [x] **ProbationaryEmployeeComparisonTable component** – New component:
-  - Collapsible "Phase One" header.
+  - Collapsible "Phase 1" header.
   - Single table: rows = employees, columns = Employee Name, Start Date, Review Date, Spend, cROAS, Spend Eval, cROAS Eval, Ads.
   - Props: `employees`, `spendEvaluationKey`, `croasEvaluationKey`, `state`.
   - View Phase Ads link: `buildAdsHref(employee)` (with date params for probationary).
@@ -57,8 +57,8 @@ Add two new dashboard sections: **Tenured Employee Comparison** and **Probationa
   - Add "Probationary Employee Comparison" section (after Probationary Employees) when `probationaryEmployees.length > 0`.
 
 - [x] **Tests** – Add tests for:
-  - Tenured comparison: section renders when tenured exist; Phase One accordion; table with employee rows.
-  - Probationary comparison: section renders when probationary exist; Phase One accordion; Employee Name column; table with employee rows.
+  - Tenured comparison: section renders when tenured exist; Phase 1 accordion; table with employee rows.
+  - Probationary comparison: section renders when probationary exist; Phase 1 accordion; Employee Name column; table with employee rows.
 
 ### Docs / Config
 

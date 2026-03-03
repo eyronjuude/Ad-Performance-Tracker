@@ -144,23 +144,23 @@ describe("Home page (dashboard)", () => {
     expect(screen.getByText("June 1, 2026")).toBeInTheDocument();
   });
 
-  it("renders Tenured Employee Comparison section with Phase One accordion", async () => {
+  it("renders Tenured Employee Comparison section with Phase 1 accordion", async () => {
     renderWithProvider(<Home />);
     expect(
       await screen.findByRole("heading", {
         name: /Tenured Employee Comparison/i,
       })
     ).toBeInTheDocument();
-    const phaseOneButton = screen.getByRole("button", { name: /Phase One/i });
+    const phaseOneButton = screen.getByRole("button", { name: /Phase 1/i });
     expect(phaseOneButton).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("expands Tenured Employee Comparison table on Phase One click", async () => {
+  it("expands Tenured Employee Comparison table on Phase 1 click", async () => {
     const user = userEvent.setup();
     renderWithProvider(<Home />);
 
     const phaseOneButton = await screen.findByRole("button", {
-      name: /Phase One/i,
+      name: /Phase 1/i,
     });
     await user.click(phaseOneButton);
 
@@ -193,7 +193,7 @@ describe("Home page (dashboard)", () => {
     ).toBeInTheDocument();
 
     const phaseOneButtons = screen.getAllByRole("button", {
-      name: /Phase One/i,
+      name: /Phase 1/i,
     });
     const probationaryPhaseOne = phaseOneButtons.find(
       (btn) =>
@@ -217,7 +217,7 @@ describe("Home page (dashboard)", () => {
 
     renderWithProvider(<Home />);
     const phaseOneButtons = await screen.findAllByRole("button", {
-      name: /Phase One/i,
+      name: /Phase 1/i,
     });
     const probationaryPhaseOne = phaseOneButtons.find(
       (btn) =>

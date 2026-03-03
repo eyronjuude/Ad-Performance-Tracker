@@ -90,7 +90,7 @@ export function ProbationaryEmployeeComparisonTable({
               clipRule="evenodd"
             />
           </svg>
-          Phase One
+          Phase 1
         </button>
       </h3>
       {phaseOneExpanded && (

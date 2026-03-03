@@ -228,20 +228,11 @@ export default function Home() {
               croasEvaluationKey={settings.croasEvaluationKey}
               state={tenuredState}
             />
-            <h2 className="mt-12 mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-              Tenured Employee Comparison
-            </h2>
-            <TenuredEmployeeComparisonTable
-              employees={tenuredEmployees}
-              spendEvaluationKey={settings.spendEvaluationKey}
-              croasEvaluationKey={settings.croasEvaluationKey}
-              state={tenuredState}
-            />
           </section>
         )}
 
         {probationaryEmployees.length > 0 && (
-          <section>
+          <section className="mb-12">
             <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
               Probationary Employees
             </h2>
@@ -262,6 +253,20 @@ export default function Home() {
               spendEvaluationKey={settings.spendEvaluationKey}
               croasEvaluationKey={settings.croasEvaluationKey}
               state={probationaryState}
+            />
+          </section>
+        )}
+
+        {tenuredEmployees.length > 0 && (
+          <section>
+            <h2 className="mb-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Tenured Employee Comparison
+            </h2>
+            <TenuredEmployeeComparisonTable
+              employees={tenuredEmployees}
+              spendEvaluationKey={settings.spendEvaluationKey}
+              croasEvaluationKey={settings.croasEvaluationKey}
+              state={tenuredState}
             />
           </section>
         )}

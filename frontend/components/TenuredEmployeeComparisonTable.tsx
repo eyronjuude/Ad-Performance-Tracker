@@ -77,7 +77,7 @@ export function TenuredEmployeeComparisonTable({
               clipRule="evenodd"
             />
           </svg>
-          Phase One
+          Phase 1
         </button>
       </h3>
       {phaseOneExpanded && (
