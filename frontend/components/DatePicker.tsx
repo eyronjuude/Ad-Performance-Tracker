@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
+import { DATE_DISPLAY_FORMAT } from "@/lib/date-utils";
 import type { DateAfter, DateBefore } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-const DISPLAY_FORMAT = "dd MMM yyyy";
 const PLACEHOLDER = "Select date";
 
 export interface DatePickerProps {
@@ -94,7 +94,7 @@ export function DatePicker({
   }, [minDate, maxDate]);
 
   const triggerContent = date ? (
-    format(date, DISPLAY_FORMAT)
+    format(date, DATE_DISPLAY_FORMAT)
   ) : (
     <span className="text-muted-foreground">{placeholder}</span>
   );

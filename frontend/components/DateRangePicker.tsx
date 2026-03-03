@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { format } from "date-fns";
+import { DATE_DISPLAY_FORMAT } from "@/lib/date-utils";
 import { CalendarIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -126,11 +127,11 @@ export function DateRangePicker({
           {dateRange?.from ? (
             dateRange.to ? (
               <>
-                {format(dateRange.from, "LLL dd, y")} –{" "}
-                {format(dateRange.to, "LLL dd, y")}
+                {format(dateRange.from, DATE_DISPLAY_FORMAT)} –{" "}
+                {format(dateRange.to, DATE_DISPLAY_FORMAT)}
               </>
             ) : (
-              format(dateRange.from, "LLL dd, y")
+              format(dateRange.from, DATE_DISPLAY_FORMAT)
             )
           ) : (
             <span>{placeholder}</span>

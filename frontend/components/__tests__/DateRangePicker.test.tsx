@@ -38,8 +38,8 @@ describe("DateRangePicker", () => {
         onRangeChange={() => {}}
       />
     );
-    expect(screen.getByText(/Jan 15, 2025/)).toBeInTheDocument();
-    expect(screen.getByText(/Jan 20, 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/January 15, 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/January 20, 2025/)).toBeInTheDocument();
   });
 
   it("renders disabled button when disabled prop is true", () => {
@@ -113,7 +113,7 @@ describe("DateRangePicker", () => {
         onRangeChange={onRangeChange}
       />
     );
-    await user.click(screen.getByText(/Jan 15, 2025/));
+    await user.click(screen.getByText(/January 15, 2025/));
     await user.click(screen.getByRole("button", { name: /Apply/i }));
     expect(onRangeChange).toHaveBeenCalledWith("2025-01-15", "2025-01-20");
     const popover = document.querySelector("[data-slot='popover-content']");

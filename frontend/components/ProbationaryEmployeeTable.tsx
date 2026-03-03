@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { formatDateForDisplay } from "@/lib/date-utils";
 import type { CroasThreshold, Employee, SpendThreshold } from "@/lib/config";
 import { Skeleton } from "./Skeleton";
 import {
@@ -156,10 +157,10 @@ export function ProbationaryEmployeeTable({
                   <tbody>
                     <tr className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800">
                       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-50">
-                        {employee.startDate ?? "—"}
+                        {formatDateForDisplay(employee.startDate)}
                       </td>
                       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-50">
-                        {employee.reviewDate ?? "—"}
+                        {formatDateForDisplay(employee.reviewDate)}
                       </td>
                       <td className="px-4 py-3 text-right text-zinc-900 tabular-nums dark:text-zinc-50">
                         {missingDates ? (

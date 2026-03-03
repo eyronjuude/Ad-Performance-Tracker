@@ -140,8 +140,8 @@ describe("Home page (dashboard)", () => {
     expect(prbButton).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Start Date")).toBeInTheDocument();
     expect(screen.getByText("Review Date")).toBeInTheDocument();
-    expect(screen.getByText("2026-01-01")).toBeInTheDocument();
-    expect(screen.getByText("2026-06-01")).toBeInTheDocument();
+    expect(screen.getByText("January 1, 2026")).toBeInTheDocument();
+    expect(screen.getByText("June 1, 2026")).toBeInTheDocument();
   });
 
   it("shows skeleton while settings are loading", () => {

@@ -19,7 +19,7 @@ describe("DatePicker", () => {
 
   it("renders formatted date when value is set", () => {
     render(<DatePicker value="2025-01-15" onChange={() => {}} />);
-    expect(screen.getByText(/15 Jan 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/January 15, 2025/)).toBeInTheDocument();
   });
 
   it("renders label when provided", () => {

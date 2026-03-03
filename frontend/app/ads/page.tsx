@@ -9,6 +9,7 @@ import {
   aggregatePerformance,
   type PerformanceRow,
 } from "@/lib/api";
+import { formatDateForDisplay } from "@/lib/date-utils";
 import { useSettings } from "@/components/SettingsProvider";
 import { AdsTable } from "@/components/AdsTable";
 import { AdsTableSkeleton } from "@/components/AdsTableSkeleton";
@@ -155,8 +156,8 @@ function AdsPageContent() {
             </span>
           </div>
           <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-            {isProbationary
-              ? `Ad performance from ${startDate} to ${endDate}`
+            {isProbationary && startDate && endDate
+              ? `Ad performance from ${formatDateForDisplay(startDate)} to ${formatDateForDisplay(endDate)}`
               : "P1 ad performance details from BigQuery"}
           </p>
         </header>
