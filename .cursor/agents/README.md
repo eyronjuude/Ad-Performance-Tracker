@@ -22,6 +22,7 @@ plan → execute → check → commit
 | `/plan` | Plan | plan-agent |
 | `/trello` | Plan | trello-agent (parse transcript → create Trello cards) |
 | `/implement` | Execute | implement-agent |
+| `/browser-test` | Check | Uses browser-testing skill (cursor-ide-browser or Playwright) |
 | `/debug` | Check | debug-agent |
 | `/security-audit` | Check | security-agent |
 | `/docs-audit` | Check | docs-agent |

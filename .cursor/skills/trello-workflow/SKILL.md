@@ -49,6 +49,8 @@ Assign the first board member to every new card. Use `get_board_members` to obta
 
 ## Trello MCP Tools
 
+Use `call_mcp_tool` with **server** `user-Trello`.
+
 | Tool | Purpose |
 |------|---------|
 | `get_board_labels` | Get label IDs for High/Medium/Low |
@@ -60,4 +62,4 @@ Assign the first board member to every new card. Use `get_board_members` to obta
 
 ## Board Setup
 
-If no active board is set: `list_boards` to find "Ad Performance Tracker", then `set_active_board` with its `boardId` before creating cards.
+If no active board is set: call `list_boards` to find "Ad Performance Tracker", then `set_active_board` with its `boardId` before creating cards. Use `get_active_board_info` to confirm the active board.

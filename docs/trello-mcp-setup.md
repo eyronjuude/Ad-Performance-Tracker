@@ -62,13 +62,57 @@ When you have a **feature transcript** (e.g. from a meeting or voice note):
 
 ## Tools Available
 
+All tools are invoked via `call_mcp_tool` with **server** `user-Trello`.
+
+### Board discovery
+
 | Tool | Purpose |
 |------|---------|
-| `get_lists` | Get lists on the board |
-| `add_card_to_list` | Create a card |
+| `list_workspaces` | List all workspaces the user has access to |
+| `list_boards` | List all boards the user has access to |
+| `list_boards_in_workspace` | List boards in a workspace (requires `workspaceId`) |
+| `get_active_board_info` | Get info about the currently active board |
+| `set_active_workspace` | Set active workspace (requires `workspaceId`) |
+| `set_active_board` | Set active board (requires `boardId`) |
+
+### Card workflow
+
+| Tool | Purpose |
+|------|---------|
+| `get_lists` | Get lists on the board (optional `boardId`) |
+| `add_card_to_list` | Create a card (`listId`, `name`, optional `description`) |
 | `get_cards_by_list_id` | Fetch cards in a list |
-| `list_boards` | List workspaces/boards |
-| `set_active_board` | Switch active board |
+| `get_card` | Get a single card by ID |
+| `update_card_details` | Update card (name, description, labels, due date, etc.) |
+
+### Labels, members, checklists
+
+| Tool | Purpose |
+|------|---------|
+| `get_board_labels` | Get label IDs for High/Medium/Low priority |
+| `get_board_members` | Get member IDs for auto-assign |
+| `assign_member_to_card` | Assign member to card |
+| `create_checklist` | Add checklist to card (e.g. "Implementation") |
+| `add_checklist_item` | Add item to checklist (`cardId`, `checkListName`, `text`) |
+
+### Additional tools
+
+| Tool | Purpose |
+|------|---------|
+| `add_comment`, `get_card_comments`, `update_comment`, `delete_comment` | Card comments |
+| `create_label`, `update_label`, `delete_label` | Label management |
+| `get_acceptance_criteria`, `get_checklist_by_name`, `get_checklist_items` | Checklist / criteria |
+| `get_card_history` | Card activity history |
+
+## Board discovery flow
+
+When `TRELLO_BOARD_ID` is not set:
+
+1. Call `list_boards` to find your board (e.g. "Ad Performance Tracker").
+2. Call `set_active_board` with the board's `boardId`.
+3. Then use `get_lists`, `add_card_to_list`, etc.
+
+Alternatively, use `list_workspaces` → `set_active_workspace` → `list_boards_in_workspace` → `set_active_board` when working within a specific workspace.
 
 ## Troubleshooting
 
