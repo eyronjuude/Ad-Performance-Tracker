@@ -29,32 +29,23 @@ Maintain linear Git history and enforce project commit standards. Align with `.c
 2. **Split**: Mutually exclusive changes → separate commits
 3. **Stage**: `git add .` or `git add <paths>`
 4. **Commit**: Conventional format, ≤50 chars subject, body ≤72/line, Co-authored-by footer. Run from terminal so Lefthook runs.
-5. **Return**: Single-line command with `&&` for Windows Terminal.
+5. **Return**: Git Bash here-doc command with `&&`. User pastes as-is.
 
-## Commit Message Formatting (Single `-m`)
+## Commit Message Formatting (Git Bash here-doc)
 
-Use a **single** `-m` flag with PowerShell newline escapes (`` `n ``) to control line breaks precisely. Do **not** use multiple `-m` flags—each `-m` inserts a blank line (paragraph break), which bloats the commit message.
-
-| Separator | PowerShell | Purpose |
-|-----------|------------|---------|
-| Blank line | `` `n`n `` | Between subject↔body and body↔footer (required) |
-| Line break | `` `n `` | Between lines within body or within footer |
+Use a **here-doc** piped to `git commit -F -`. Works in Git Bash, Bash, WSL. No escape sequences; natural multi-line formatting. The closing `EOF` must be at the start of its line.
 
 ### Structure
 
-```text
-<type>[scope]: <description>
-                                          ← blank line
-<body line 1, ≤72 chars>
-<body line 2, ≤72 chars>
-                                          ← blank line
+```bash
+git add . && git commit -F - <<'EOF'
+<subject>
+
+<body line 1>
+<body line 2>
+
 Co-authored-by: Model <email>
-```
-
-In a single `-m` string with PowerShell escapes this becomes:
-
-```text
-"<subject>`n`n<body line 1>`n<body line 2>`n`nCo-authored-by: ..."
+EOF
 ```
 
 ## SSH (push/pull over SSH)
@@ -67,14 +58,28 @@ Before suggesting `git push` or `git pull` over SSH: If `ssh-add -l` returns no 
 
 ## Example Commit
 
-```powershell
-git add . && git commit -m "feat(api): add user auth with OAuth2`n`nImplements JWT login and token refresh.`n`nCo-authored-by: Composer <noreply@cursor.com>"
+```bash
+git add . && git commit -F - <<'EOF'
+feat(api): add user auth with OAuth2
+
+Implements JWT login and token refresh.
+
+Co-authored-by: Composer <noreply@cursor.com>
+EOF
 ```
 
-Multi-line body (lines stay together, no extra blank lines):
+Multi-line body:
 
-```powershell
-git add . && git commit -m "feat(api): add user auth`n`nAdd JWT login.`nAdd token refresh.`nAdd session management.`n`nCo-authored-by: Composer <noreply@cursor.com>"
+```bash
+git add . && git commit -F - <<'EOF'
+feat(api): add user auth
+
+Add JWT login.
+Add token refresh.
+Add session management.
+
+Co-authored-by: Composer <noreply@cursor.com>
+EOF
 ```
 
 ## Checklist
@@ -83,4 +88,4 @@ git add . && git commit -m "feat(api): add user auth`n`nAdd JWT login.`nAdd toke
 - [ ] Conventional Commits (type, imperative, optional scope)
 - [ ] Co-authored-by for all AI contributors
 - [ ] Rebase before merge/push when possible
-- [ ] Use `&&` for Windows Terminal in suggested commands
+- [ ] Use Git Bash here-doc format; `&&` to chain
