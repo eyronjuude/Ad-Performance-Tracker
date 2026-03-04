@@ -1,6 +1,8 @@
 # Trello MCP Setup
 
-This project can use the [Trello MCP Server](https://github.com/delorenj/mcp-server-trello) to create and manage Trello cards from transcripts and feature descriptions. The **trello-agent** parses transcripts and creates cards automatically.
+This project uses the [Trello MCP Server](https://github.com/delorenj/mcp-server-trello) to create and manage Trello cards from transcripts and feature descriptions. The **trello-agent** parses transcripts and creates cards automatically.
+
+The Trello MCP is configured at the **project level** in `.cursor/mcp.json`, so it is only active when working in this project (Ad Performance Tracker).
 
 ## 1. Get Trello Credentials
 
@@ -16,32 +18,21 @@ This project can use the [Trello MCP Server](https://github.com/delorenj/mcp-ser
 3. **Board ID** (optional): Open your Trello board. The ID is in the URL:  
    `https://trello.com/b/XXXXXXX/board-name` → `XXXXXXX` is the board ID.
 
-## 2. Configure Cursor MCP
+## 2. Add Your Credentials
 
-Add the Trello MCP server to Cursor's MCP configuration.
+The Trello MCP is already defined in `.cursor/mcp.json`. You must add your credentials:
 
-**Location**: Cursor Settings → **MCP** (or edit your MCP config file).
+**Option A – Edit `.cursor/mcp.json` locally**
 
-**Config** (using Bun, per project rules):
+Fill in `TRELLO_API_KEY` and `TRELLO_TOKEN` in the `env` block. Optionally add `TRELLO_BOARD_ID` for the Ad Performance Tracker board.
 
-```json
-{
-  "mcpServers": {
-    "trello": {
-      "command": "bunx",
-      "args": ["@delorenj/mcp-server-trello"],
-      "env": {
-        "TRELLO_API_KEY": "<your-api-key>",
-        "TRELLO_TOKEN": "<your-token>"
-      }
-    }
-  }
-}
-```
+> **Security**: Do not commit real credentials. If you edit the file, ensure your changes are not staged for commit (or add `.cursor/mcp.json` to `.gitignore` locally for your edits).
 
-Optional: add `TRELLO_BOARD_ID` to `env` to set a default board.
+**Option B – Cursor Settings**
 
-> **Security**: Do not commit real credentials. Use Cursor’s env/config UI or store in a local, gitignored file.
+1. Open Cursor Settings → **MCP**.
+2. Find the **trello** server (from this project’s config).
+3. Edit it and add `TRELLO_API_KEY`, `TRELLO_TOKEN`, and optionally `TRELLO_BOARD_ID` in the environment overrides.
 
 ## 3. Verify Connection
 
@@ -62,7 +53,7 @@ When you have a **feature transcript** (e.g. from a meeting or voice note):
 
 ## Tools Available
 
-All tools are invoked via `call_mcp_tool` with **server** `user-Trello`.
+All tools are invoked via `call_mcp_tool` with **server** `trello`.
 
 ### Board discovery
 
@@ -116,6 +107,7 @@ Alternatively, use `list_workspaces` → `set_active_workspace` → `list_boards
 
 ## Troubleshooting
 
-- **"Trello MCP not found"**: Ensure MCP config is saved and Cursor was restarted.
+- **"Trello MCP not found"**: Ensure credentials are set in `.cursor/mcp.json` or Cursor MCP settings, then restart Cursor.
 - **Auth errors**: Regenerate the token; ensure `read,write` scope.
 - **Wrong board**: Use `set_active_board` with the correct `boardId`, or set `TRELLO_BOARD_ID` in env.
+- **Server identifier**: The project-level server is `trello` (not `user-Trello`). Ensure you removed any user-level Trello MCP to avoid conflicts.

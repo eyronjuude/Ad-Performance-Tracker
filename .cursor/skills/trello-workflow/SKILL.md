@@ -49,7 +49,7 @@ Assign the first board member to every new card. Use `get_board_members` to obta
 
 ## Trello MCP Tools
 
-Use `call_mcp_tool` with **server** `user-Trello`.
+Use `call_mcp_tool` with **server** `trello`.
 
 | Tool | Purpose |
 |------|---------|
