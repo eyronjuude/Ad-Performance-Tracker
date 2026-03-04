@@ -1,6 +1,7 @@
 # Agent Pipeline
 
-Agents are grouped by stage in the development pipeline.
+Agents are grouped by stage in the development pipeline. All agent
+files live directly in `.cursor/agents/` (flat structure, no subdirectories).
 
 ## Pipeline
 
@@ -14,6 +15,24 @@ plan → execute → check → commit
 | **Execute** | Implement features (backend, frontend, or both) | `implement-agent`, `backend-agent`, `frontend-agent` |
 | **Check** | Verify, test, audit, debug failures | `tester-agent`, `security-agent`, `debug-agent`, `docs-agent` |
 | **Commit** | Commit and push with standards | `git-agent` |
+
+## Files
+
+```
+.cursor/agents/
+├── README.md
+├── plan-agent.md
+├── researcher-agent.md
+├── trello-agent.md
+├── implement-agent.md
+├── backend-agent.md
+├── frontend-agent.md
+├── tester-agent.md
+├── security-agent.md
+├── debug-agent.md
+├── docs-agent.md
+└── git-agent.md
+```
 
 ## Commands
 
